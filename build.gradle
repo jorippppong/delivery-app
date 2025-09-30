@@ -50,3 +50,48 @@ tasks.register('copyConfig', Copy) {
 }
 
 processResources.dependsOn('copyConfig')
+
+tasks.register('dockerUp', Exec) {
+    group = 'docker'
+    description = 'Start Docker Compose services'
+    commandLine 'docker-compose', 'up', '-d'
+}
+
+tasks.register('dockerDown', Exec) {
+    group = 'docker'
+    description = 'Stop Docker Compose services'
+    commandLine 'docker-compose', 'down'
+}
+
+tasks.register('dockerRestart', Exec) {
+    group = 'docker'
+    description = 'Restart Docker Compose services'
+    commandLine 'docker-compose', 'restart'
+}
+
+tasks.register('dockerLogs', Exec) {
+    group = 'docker'
+    description = 'Show Docker Compose logs'
+    commandLine 'docker-compose', 'logs', '-f'
+}
+
+tasks.named('bootRun') {
+    dependsOn 'dockerUp'
+    doFirst {
+        println "Starting Docker Compose services..."
+    }
+}
+
+tasks.named('test') {
+    dependsOn 'dockerUp'
+    doFirst {
+        println "Starting Docker Compose services for testing..."
+    }
+}
+
+tasks.named('build') {
+    dependsOn 'dockerUp'
+    doFirst {
+        println "Ensuring Docker Compose services are running..."
+    }
+}
