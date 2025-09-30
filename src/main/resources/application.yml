@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: foodorder
+
+  datasource:
+    url: jdbc:mysql://localhost:3308/foodorder?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: foodorder
+    password: foodorder123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+    defer-datasource-initialization: false
+
+server:
+  port: 8080
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
