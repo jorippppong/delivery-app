@@ -41,6 +41,7 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+
 // Docker Compose 자동 시작 태스크 (최신 방식)
 tasks.register('startDockerCompose', Exec) {
     group = 'docker'
@@ -58,3 +59,14 @@ tasks.register('stopDockerCompose', Exec) {
 tasks.named('bootRun') {
     dependsOn 'startDockerCompose'
 }
+=======
+
+// application.yml 설정 파일 복사
+tasks.register('copyConfig', Copy) {
+    from 'config'
+    include "application.yml"
+    into 'src/main/resources'
+}
+
+processResources.dependsOn('copyConfig')
+
