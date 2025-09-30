@@ -22,14 +22,17 @@ public class Address extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false, length = 200)
-    private String address;
+    @Column(name = "address_name", length = 50)
+    private String addressName;
 
-    @Column(length = 100)
+    @Column(name = "address_line", nullable = false, length = 255)
+    private String addressLine;
+
+    @Column(name = "detail_address", length = 255)
     private String detailAddress;
 
-    @Column(length = 10)
-    private String zipCode;
+    @Column(name = "postal_code", length = 20)
+    private String postalCode;
 
     @Column(length = 50)
     private String recipientName;
@@ -41,21 +44,22 @@ public class Address extends BaseEntity {
     private Boolean isDefault = false;
 
     @Builder
-    public Address(User user, String address, String detailAddress, String zipCode, 
+    public Address(User user, String addressName, String addressLine, String detailAddress, String postalCode, 
                    String recipientName, String recipientPhone, Boolean isDefault) {
         this.user = user;
-        this.address = address;
+        this.addressName = addressName;
+        this.addressLine = addressLine;
         this.detailAddress = detailAddress;
-        this.zipCode = zipCode;
+        this.postalCode = postalCode;
         this.recipientName = recipientName;
         this.recipientPhone = recipientPhone;
         this.isDefault = isDefault != null ? isDefault : false;
     }
 
-    public void updateAddress(String address, String detailAddress, String zipCode) {
-        this.address = address;
+    public void updateAddress(String addressLine, String detailAddress, String postalCode) {
+        this.addressLine = addressLine;
         this.detailAddress = detailAddress;
-        this.zipCode = zipCode;
+        this.postalCode = postalCode;
     }
 
     public void updateRecipient(String recipientName, String recipientPhone) {

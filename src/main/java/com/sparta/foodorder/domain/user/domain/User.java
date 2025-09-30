@@ -17,38 +17,42 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true, length = 50)
-    private String username;
+    @Column(nullable = false, length = 50)
+    private String name;
 
-    @Column(nullable = false, length = 100)
+    @Column(nullable = false, length = 50)
+    private String nickName;
+
+    @Column(name = "user_email", nullable = false, unique = true, length = 100)
+    private String userEmail;
+
+    @Column(nullable = false, length = 255)
     private String password;
 
-    @Column(nullable = false, length = 100)
-    private String email;
-
-    @Column(length = 20)
-    private String phoneNumber;
+    @Column(name = "user_phone", nullable = false, length = 20)
+    private String userPhone;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserRole role = UserRole.CUSTOMER;
+    private UserRole role = UserRole.USER;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserStatus status = UserStatus.ACTIVE;
 
     @Builder
-    public User(String username, String password, String email, String phoneNumber, UserRole role) {
-        this.username = username;
+    public User(String name, String nickName, String userEmail, String password, String userPhone, UserRole role) {
+        this.name = name;
+        this.nickName = nickName;
+        this.userEmail = userEmail;
         this.password = password;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.role = role != null ? role : UserRole.CUSTOMER;
+        this.userPhone = userPhone;
+        this.role = role != null ? role : UserRole.USER;
     }
 
-    public void updateProfile(String email, String phoneNumber) {
-        this.email = email;
-        this.phoneNumber = phoneNumber;
+    public void updateProfile(String userEmail, String userPhone) {
+        this.userEmail = userEmail;
+        this.userPhone = userPhone;
     }
 
     public void changePassword(String newPassword) {
@@ -61,5 +65,9 @@ public class User extends BaseEntity {
 
     public void activate() {
         this.status = UserStatus.ACTIVE;
+    }
+
+    public void ban() {
+        this.status = UserStatus.BANNED;
     }
 }
