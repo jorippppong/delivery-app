@@ -3,8 +3,6 @@ package com.sparta.foodorder.domain.payment.domain;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import org.hibernate.annotations.GenericGenerator;
-
 import com.sparta.foodorder.global.common.BaseUpdateEntity;
 
 import jakarta.persistence.Column;
@@ -12,7 +10,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -25,10 +25,11 @@ import lombok.NoArgsConstructor;
 public class Payment extends BaseUpdateEntity {
 
 	@Id
-	@GeneratedValue(generator = "uuid2")
-	@GenericGenerator(name = "uuid2", strategy = "uuid2")
-	@Column(columnDefinition = "BINARY(16)")
-	private UUID id;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@Column(name = "payment_public_id", nullable = false, unique = true, updatable = false, columnDefinition = "BINARY(16)")
+	private UUID paymentPublicId;
 
 	@Column(name = "user_id", nullable = false)
 	private Long userId;
@@ -75,6 +76,13 @@ public class Payment extends BaseUpdateEntity {
 	public static Payment createPayment(Long userId, Long orderId, Integer amount,
 		PaymentMethod paymentMethod, String pgTransactionId) {
 		return new Payment(userId, orderId, amount, paymentMethod, pgTransactionId);
+	}
+
+	@PrePersist
+	public void generatePaymentPublicId() {
+		if (this.paymentPublicId == null) {
+			this.paymentPublicId = UUID.randomUUID();
+		}
 	}
 
 	public void completePayment() {
