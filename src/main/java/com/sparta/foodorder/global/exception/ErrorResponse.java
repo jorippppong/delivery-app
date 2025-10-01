@@ -1,5 +1,6 @@
 package com.sparta.foodorder.global.exception;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Getter;
 import org.springframework.validation.BindingResult;
@@ -9,6 +10,7 @@ import java.util.List;
 
 @Getter
 @Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorResponse {
     private final int status;
     private final String code;
@@ -46,6 +48,7 @@ public class ErrorResponse {
 
     @Getter
     @Builder
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class FieldError {
         private final String field;
         private final String value;
