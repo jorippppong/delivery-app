@@ -40,3 +40,13 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
+
+
+// application.yml 설정 파일 복사
+tasks.register('copyConfig', Copy) {
+    from 'config'
+    include "application.yml"
+    into 'src/main/resources'
+}
+
+processResources.dependsOn('copyConfig')
