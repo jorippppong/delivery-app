@@ -1,6 +1,12 @@
-[//]: # (PR 제목 예시 : [feature/DB-1]: 로그 설정)
+<!--
+PR 제목은 이슈 이름과 동일하게 작성해주세요.
+  (예시 : [feature] 로그 설정)
 
-issue : 
+merge commit message는 "PR 제목 + (#PR번호)"로 작성해주세요. 
+  (예시 : [feature] 로그 설정 (#9))
+-->
+
+close #
 
 ## 📄 Work Description
 <!--
