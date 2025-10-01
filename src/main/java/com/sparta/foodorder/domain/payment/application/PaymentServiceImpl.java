@@ -37,15 +37,20 @@ public class PaymentServiceImpl implements PaymentService {
 		//     throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS);
 		// }
 
-		// 3. 중복 결제 방지
+		// TODO: 3. requestDto.storeId()와 order.getStoreId() 일치 확인
+		// if (!order.getStoreId().equals(requestDto.storeId())) {
+		//     throw new BusinessException(ErrorCode.INVALID_STORE_ORDER);
+		// }
+
+		// 4. 중복 결제 방지
 		if (paymentRepository.existsByOrderId(requestDto.orderId())) {
 			throw new BusinessException(ErrorCode.PAYMENT_ALREADY_EXISTS);
 		}
 
-		// 4. Fake PG 거래 ID 생성 (실제로는 PG사 API 호출)
+		// 5. Fake PG 거래 ID 생성 (실제로는 PG사 API 호출)
 		String pgTransactionId = "fake_toss_tx_" + UUID.randomUUID().toString().substring(0, 8);
 
-		// 5. 결제 엔티티 생성
+		// 6. 결제 엔티티 생성
 		Payment payment = Payment.createPayment(
 			userId,
 			requestDto.orderId(),
@@ -54,12 +59,12 @@ public class PaymentServiceImpl implements PaymentService {
 			pgTransactionId
 		);
 
-		// 6. 결제 완료 처리 (테스트 환경이므로 바로 완료)
+		// 7. 결제 완료 처리 (테스트 환경이므로 바로 완료)
 		payment.completePayment();
 
 		Payment savedPayment = paymentRepository.save(payment);
 
-		// TODO: 7. Order 상태를 PAID로 변경
+		// TODO: 8. Order 상태를 PAID로 변경
 		// orderService.updateOrderStatus(requestDto.orderId(), OrderStatus.PAID);
 
 		return PaymentResponseDto.from(savedPayment, requestDto.storeId());
@@ -67,9 +72,9 @@ public class PaymentServiceImpl implements PaymentService {
 
 	@Override
 	@Transactional
-	public PaymentResponseDto refundPayment(Long paymentId, PaymentRefundRequestDto requestDto, Long userId, String role) {
-		// 1. 결제 조회
-		Payment payment = paymentRepository.findById(paymentId)
+	public PaymentResponseDto refundPayment(UUID paymentId, PaymentRefundRequestDto requestDto, Long userId, String role) {
+		// 1. UUID로 결제 조회
+		Payment payment = paymentRepository.findByPaymentPublicId(paymentId)
 			.orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
 
 		// TODO: 2. storeId 조회를 위해 Order 조회 필요
@@ -102,9 +107,9 @@ public class PaymentServiceImpl implements PaymentService {
 	}
 
 	@Override
-	public PaymentResponseDto getPayment(Long paymentId, Long userId, String role) {
-		// 1. 결제 조회
-		Payment payment = paymentRepository.findById(paymentId)
+	public PaymentResponseDto getPayment(UUID paymentId, Long userId, String role) {
+		// 1. UUID로 결제 조회 (한 번에!)
+		Payment payment = paymentRepository.findByPaymentPublicId(paymentId)
 			.orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
 
 		// TODO: 2. storeId 조회를 위해 Order 조회 필요
@@ -116,6 +121,13 @@ public class PaymentServiceImpl implements PaymentService {
 		validateReadPermission(payment, userId, role, storeId);
 
 		return PaymentResponseDto.from(payment, storeId);
+	}
+
+	// 내부용 메서드 - Long id로 조회 (다른 서비스에서 호출용)
+	@Transactional(readOnly = true)
+	public Payment getPaymentByIdInternal(Long paymentId) {
+		return paymentRepository.findById(paymentId)
+			.orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
 	}
 
 	private void validateRefundPermission(Payment payment, Long userId, String role, Long storeId) {

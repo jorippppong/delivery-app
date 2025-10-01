@@ -1,5 +1,7 @@
 package com.sparta.foodorder.domain.payment.presentation;
 
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -40,7 +42,7 @@ public class PaymentController {
 
 	@PostMapping("/{paymentId}/refund")
 	public ResponseEntity<PaymentResponseDto> refundPayment(
-		@PathVariable Long paymentId,
+		@PathVariable UUID paymentId,
 		@Valid @RequestBody PaymentRefundRequestDto paymentRefundRequestDto
 	) {
 		// TODO: 인증 구현 후 실제 userId, role 사용
@@ -54,7 +56,7 @@ public class PaymentController {
 
 	@GetMapping("/{paymentId}")
 	public ResponseEntity<PaymentResponseDto> getPayment(
-		@PathVariable Long paymentId
+		@PathVariable UUID paymentId
 	) {
 		Long userId = 1L;
 		String role = "CUSTOMER";

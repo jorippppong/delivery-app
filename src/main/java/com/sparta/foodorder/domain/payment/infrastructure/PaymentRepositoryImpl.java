@@ -1,6 +1,7 @@
 package com.sparta.foodorder.domain.payment.infrastructure;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Repository;
 
@@ -27,7 +28,12 @@ public class PaymentRepositoryImpl implements PaymentRepository {
 	}
 
 	@Override
+	public Optional<Payment> findByPaymentPublicId(UUID paymentPublicId) {
+		return jpaRepository.findByPaymentPublicId(paymentPublicId);
+	}
+
+	@Override
 	public boolean existsByOrderId(Long orderId) {
-		return jpaRepository.existsById(orderId);
+		return jpaRepository.existsByOrderId(orderId);
 	}
 }

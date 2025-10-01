@@ -1,13 +1,14 @@
 package com.sparta.foodorder.domain.payment.application.dto;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import com.sparta.foodorder.domain.payment.domain.Payment;
 import com.sparta.foodorder.domain.payment.domain.PaymentMethod;
 import com.sparta.foodorder.domain.payment.domain.PaymentStatus;
 
 public record PaymentResponseDto (
-	Long id,
+	UUID paymentPublicId,
 	Long userId,
 	Long storeId,
 	Long orderId,
@@ -30,7 +31,7 @@ public record PaymentResponseDto (
 
 	public static PaymentResponseDto from(Payment payment, Long storeId) {
 		return new PaymentResponseDto(
-			payment.getId(),
+			payment.getPaymentPublicId(),
 			payment.getUserId(),
 			storeId,
 			payment.getOrderId(),
