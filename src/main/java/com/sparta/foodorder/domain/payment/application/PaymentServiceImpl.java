@@ -80,18 +80,22 @@ public class PaymentServiceImpl implements PaymentService {
 		// 3. 권한 확인
 		validateRefundPermission(payment, userId, role, storeId);
 
-		// 4. 환불 가능 상태 확인
-		if (!payment.isRefundableOrCancellable()) {
-			throw new BusinessException(ErrorCode.PAYMENT_NOT_REFUNDABLE,
-				"현재 결제 상태: " + payment.getStatus());
+		// 4. 고객의 경우 5분 이내 환불만 가능
+		if ("CUSTOMER".equals(role) && !payment.isRefundableWithinTimeLimit()) {
+			throw new BusinessException(ErrorCode.PAYMENT_REFUND_TIME_EXPIRED);
 		}
 
-		// 5. 환불 처리
+		// 5. 환불 가능 상태 확인
+		if (!payment.isRefundableOrCancellable()) {
+			throw new BusinessException(ErrorCode.PAYMENT_NOT_REFUNDABLE);
+		}
+
+		// 6. 환불 처리
 		payment.refundPayment(requestDto.failReason());
 
 		Payment savedPayment = paymentRepository.save(payment);
 
-		// TODO: 6. Order 상태를 REFUNDED로 변경
+		// TODO: 7. Order 상태를 REFUNDED로 변경
 		// orderService.updateOrderStatus(payment.getOrderId(), OrderStatus.REFUNDED);
 
 		return PaymentResponseDto.from(savedPayment, storeId);
@@ -121,23 +125,22 @@ public class PaymentServiceImpl implements PaymentService {
 
 		if ("CUSTOMER".equals(role)) {
 			if (!payment.getUserId().equals(userId)) {
-				throw new BusinessException(ErrorCode.PAYMENT_ACCESS_DENIED,
-					"본인의 결제만 환불할 수 있습니다.");
+				throw new BusinessException(ErrorCode.PAYMENT_USER_MISMATCH);
 			}
 			return;
 		}
 
 		if ("OWNER".equals(role)) {
-			// TODO: 실제로는 Order를 통해 Store를 조회하여 owner 확인 필요
-			// Store store = storeService.getStore(storeId);
+			// TODO: 실제로는 Order를 통해 Store를 조회하여 ownerId 확인 필요
+			// Order order = orderService.getOrder(payment.getOrderId());
+			// Store store = storeService.getStore(order.getStoreId());
 			// if (!store.getOwnerId().equals(userId)) {
-			//     throw new BusinessException(ErrorCode.PAYMENT_ACCESS_DENIED,
-			//         "본인 가게의 주문만 환불할 수 있습니다.");
+			//     throw new BusinessException(ErrorCode.PAYMENT_OWNER_MISMATCH);
 			// }
 			return;
 		}
 
-		throw new BusinessException(ErrorCode.PAYMENT_ACCESS_DENIED, "권한이 없습니다.");
+		throw new BusinessException(ErrorCode.PAYMENT_ACCESS_DENIED);
 	}
 
 	private void validateReadPermission(Payment payment, Long userId, String role, Long storeId) {

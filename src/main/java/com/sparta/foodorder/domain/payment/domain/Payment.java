@@ -96,12 +96,6 @@ public class Payment extends BaseUpdateEntity {
 		this.failedAt = LocalDateTime.now();
 	}
 
-	public void cancelPayment(String reason) {
-		this.status = PaymentStatus.CANCELLED;
-		this.failReason = reason;
-		this.failedAt = LocalDateTime.now();
-	}
-
 	public void refundPayment(String reason) {
 		this.status = PaymentStatus.REFUNDED;
 		this.failReason = reason;
@@ -110,5 +104,13 @@ public class Payment extends BaseUpdateEntity {
 
 	public boolean isRefundableOrCancellable() {
 		return this.status == PaymentStatus.PAID;
+	}
+
+	public boolean isRefundableWithinTimeLimit() {
+		if (this.paidAt == null) {
+			return false;
+		}
+		LocalDateTime fiveMinutesAfterPaid = this.paidAt.plusMinutes(5);
+		return LocalDateTime.now().isBefore(fiveMinutesAfterPaid);
 	}
 }
