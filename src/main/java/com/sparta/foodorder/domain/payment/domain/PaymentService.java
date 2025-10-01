@@ -8,7 +8,7 @@ public interface PaymentService {
 
 	PaymentResponseDto createPayment(PaymentCreateRequestDto paymentCreateRequestDto, Long userId);
 
-	PaymentResponseDto refundPayment(Long paymentId, PaymentRefundRequestDto paymentRefundRequestDto, Long userId, Long role);
+	PaymentResponseDto refundPayment(Long paymentId, PaymentRefundRequestDto paymentRefundRequestDto, Long userId, String role);
 
-	PaymentResponseDto getPayment(Long paymentId, Long userId, Long role);
+	PaymentResponseDto getPayment(Long paymentId, Long userId, String role);
 }

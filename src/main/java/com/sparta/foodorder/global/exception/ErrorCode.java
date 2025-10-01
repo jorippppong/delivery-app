@@ -27,7 +27,13 @@ public enum ErrorCode {
 
     // 주문 관련 에러
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "O001", "주문을 찾을 수 없습니다"),
-    INVALID_ORDER_STATUS(HttpStatus.BAD_REQUEST, "O002", "잘못된 주문 상태입니다");
+    INVALID_ORDER_STATUS(HttpStatus.BAD_REQUEST, "O002", "잘못된 주문 상태입니다"),
+
+    // 결제 관련 에러
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "PAY001", "결제를 찾을 수 없습니다"),
+    PAYMENT_ALREADY_EXISTS(HttpStatus.CONFLICT, "PAY002", "이미 결제가 존재하는 주문입니다"),
+    PAYMENT_NOT_REFUNDABLE(HttpStatus.BAD_REQUEST, "PAY003", "환불이 불가능한 결제 상태입니다"),
+    PAYMENT_ACCESS_DENIED(HttpStatus.FORBIDDEN, "PAY004", "결제에 대한 접근 권한이 없습니다");
 
     private final HttpStatus status;
     private final String code;
