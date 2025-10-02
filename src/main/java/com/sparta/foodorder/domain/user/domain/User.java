@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "p_user")
 @Getter
@@ -40,14 +42,19 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private UserStatus status = UserStatus.ACTIVE;
 
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
+
     @Builder
-    public User(String name, String nickName, String userEmail, String password, String userPhone, UserRole role) {
+    public User(String name, String nickName, String userEmail, String password, String userPhone, UserRole role, UserStatus status, Boolean isDeleted) {
         this.name = name;
         this.nickName = nickName;
         this.userEmail = userEmail;
         this.password = password;
         this.userPhone = userPhone;
         this.role = role != null ? role : UserRole.USER;
+        this.status = status != null ? status : UserStatus.ACTIVE;
+        this.isDeleted = isDeleted != null ? isDeleted : false;
     }
 
     public void updateProfile(String userEmail, String userPhone) {
@@ -69,5 +76,9 @@ public class User extends BaseEntity {
 
     public void ban() {
         this.status = UserStatus.BANNED;
+    }
+    
+    public Set<UserRole> getRoles() {
+        return Set.of(this.role);
     }
 }

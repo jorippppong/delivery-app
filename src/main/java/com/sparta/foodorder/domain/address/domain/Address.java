@@ -43,9 +43,12 @@ public class Address extends BaseEntity {
     @Column(nullable = false)
     private Boolean isDefault = false;
 
+    @Column(name = "is_deleted", nullable = false)
+    private Boolean isDeleted = false;
+
     @Builder
     public Address(User user, String addressName, String addressLine, String detailAddress, String postalCode, 
-                   String recipientName, String recipientPhone, Boolean isDefault) {
+                   String recipientName, String recipientPhone, Boolean isDefault, Boolean isDeleted) {
         this.user = user;
         this.addressName = addressName;
         this.addressLine = addressLine;
@@ -54,6 +57,7 @@ public class Address extends BaseEntity {
         this.recipientName = recipientName;
         this.recipientPhone = recipientPhone;
         this.isDefault = isDefault != null ? isDefault : false;
+        this.isDeleted = isDeleted != null ? isDeleted : false;
     }
 
     public void updateAddress(String addressLine, String detailAddress, String postalCode) {
