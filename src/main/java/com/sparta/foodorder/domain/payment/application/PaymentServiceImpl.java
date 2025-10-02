@@ -2,6 +2,7 @@ package com.sparta.foodorder.domain.payment.application;
 
 import java.util.UUID;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,6 +15,7 @@ import com.sparta.foodorder.domain.payment.application.dto.PaymentResponseDto;
 import com.sparta.foodorder.domain.payment.domain.Payment;
 import com.sparta.foodorder.domain.payment.domain.PaymentRepository;
 import com.sparta.foodorder.domain.payment.domain.PaymentService;
+import com.sparta.foodorder.domain.payment.event.PaymentEvent;
 import com.sparta.foodorder.global.exception.BusinessException;
 import com.sparta.foodorder.global.exception.ErrorCode;
 
@@ -23,11 +25,13 @@ public class PaymentServiceImpl implements PaymentService {
 	private final PaymentRepository paymentRepository;
 	private final OrderRepository orderRepository;
 	private final StoreRepository storeRepository;
+	private final ApplicationEventPublisher eventPublisher;
 
-	public PaymentServiceImpl(PaymentRepository paymentRepository, OrderRepository orderRepository, StoreRepository storeRepository) {
+	public PaymentServiceImpl(PaymentRepository paymentRepository, OrderRepository orderRepository, StoreRepository storeRepository, ApplicationEventPublisher eventPublisher) {
 		this.paymentRepository = paymentRepository;
 		this.orderRepository = orderRepository;
 		this.storeRepository = storeRepository;
+		this.eventPublisher = eventPublisher;
 	}
 
 	@Override
@@ -63,8 +67,9 @@ public class PaymentServiceImpl implements PaymentService {
 
 		Payment savedPayment = paymentRepository.save(payment);
 
-		order.updateStatus(OrderStatus.PENDING);
-		orderRepository.save(order);
+		eventPublisher.publishEvent(
+			new PaymentEvent.PaymentCompleted(savedPayment.getOrderId(), savedPayment.getId())
+		);
 
 		return PaymentResponseDto.from(savedPayment , order.getStoreId());
 	}
@@ -93,9 +98,13 @@ public class PaymentServiceImpl implements PaymentService {
 
 		Payment savedPayment = paymentRepository.save(payment);
 
-		order.updateStatus(OrderStatus.CANCELED);
-
-		orderRepository.save(order);
+		eventPublisher.publishEvent(
+			new PaymentEvent.PaymentRefunded(
+				payment.getOrderId(),
+				savedPayment.getId(),
+				requestDto.failReason()
+			)
+		);
 
 		return PaymentResponseDto.from(savedPayment, order.getStoreId());
 	}
