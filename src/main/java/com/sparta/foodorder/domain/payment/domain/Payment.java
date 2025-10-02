@@ -9,8 +9,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
@@ -25,17 +23,21 @@ import lombok.NoArgsConstructor;
 public class Payment extends BaseUpdateEntity {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	@Column(columnDefinition = "BINARY(16)", nullable = false)
+	private UUID id;
 
-	@Column(name = "payment_public_id", nullable = false, unique = true, updatable = false, columnDefinition = "BINARY(16)")
-	private UUID paymentPublicId;
+	@PrePersist
+	public void generateId() {
+		if (this.id == null) {
+			this.id = UUID.randomUUID();
+		}
+	}
 
 	@Column(name = "user_id", nullable = false)
 	private Long userId;
 
-	@Column(name = "order_id", nullable = false, unique = true)
-	private Long orderId;
+	@Column(name = "order_id", nullable = false, unique = true, columnDefinition = "BINARY(16)")
+	private UUID orderId;
 
 	@Column(nullable = false)
 	private Integer amount;
@@ -63,7 +65,7 @@ public class Payment extends BaseUpdateEntity {
 	@Column(name = "refunded_at")
 	private LocalDateTime refundedAt;
 
-	private Payment(Long userId, Long orderId, Integer amount,
+	private Payment(Long userId, UUID orderId, Integer amount,
 		PaymentMethod paymentMethod, String pgTransactionId) {
 		this.userId = userId;
 		this.orderId = orderId;
@@ -73,17 +75,11 @@ public class Payment extends BaseUpdateEntity {
 		this.status = PaymentStatus.READY;
 	}
 
-	public static Payment createPayment(Long userId, Long orderId, Integer amount,
+	public static Payment createPayment(Long userId, UUID orderId, Integer amount,
 		PaymentMethod paymentMethod, String pgTransactionId) {
 		return new Payment(userId, orderId, amount, paymentMethod, pgTransactionId);
 	}
 
-	@PrePersist
-	public void generatePaymentPublicId() {
-		if (this.paymentPublicId == null) {
-			this.paymentPublicId = UUID.randomUUID();
-		}
-	}
 
 	public void completePayment() {
 		this.status = PaymentStatus.PAID;

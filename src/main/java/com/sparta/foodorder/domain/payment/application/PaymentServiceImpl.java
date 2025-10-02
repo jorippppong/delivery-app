@@ -42,15 +42,12 @@ public class PaymentServiceImpl implements PaymentService {
 		//     throw new BusinessException(ErrorCode.INVALID_STORE_ORDER);
 		// }
 
-		// 4. 중복 결제 방지
 		if (paymentRepository.existsByOrderId(requestDto.orderId())) {
 			throw new BusinessException(ErrorCode.PAYMENT_ALREADY_EXISTS);
 		}
 
-		// 5. Fake PG 거래 ID 생성 (실제로는 PG사 API 호출)
 		String pgTransactionId = "fake_toss_tx_" + UUID.randomUUID().toString().substring(0, 8);
 
-		// 6. 결제 엔티티 생성
 		Payment payment = Payment.createPayment(
 			userId,
 			requestDto.orderId(),
@@ -59,7 +56,6 @@ public class PaymentServiceImpl implements PaymentService {
 			pgTransactionId
 		);
 
-		// 7. 결제 완료 처리 (테스트 환경이므로 바로 완료)
 		payment.completePayment();
 
 		Payment savedPayment = paymentRepository.save(payment);
@@ -73,34 +69,30 @@ public class PaymentServiceImpl implements PaymentService {
 	@Override
 	@Transactional
 	public PaymentResponseDto refundPayment(UUID paymentId, PaymentRefundRequestDto requestDto, Long userId, String role) {
-		// 1. UUID로 결제 조회
-		Payment payment = paymentRepository.findByPaymentPublicId(paymentId)
+
+		Payment payment = paymentRepository.findById(paymentId)
 			.orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
 
-		// TODO: 2. storeId 조회를 위해 Order 조회 필요
+		// TODO: storeId 조회를 위해 Order 조회 필요
 		// Order order = orderService.getOrder(payment.getOrderId());
-		// Long storeId = order.getStoreId();
-		Long storeId = null; // TODO: Order에서 가져오기
+		// UUID storeId = order.getStoreId();
+		UUID storeId = null;
 
-		// 3. 권한 확인
 		validateRefundPermission(payment, userId, role, storeId);
 
-		// 4. 고객의 경우 5분 이내 환불만 가능
 		if ("CUSTOMER".equals(role) && !payment.isRefundableWithinTimeLimit()) {
 			throw new BusinessException(ErrorCode.PAYMENT_REFUND_TIME_EXPIRED);
 		}
 
-		// 5. 환불 가능 상태 확인
 		if (!payment.isRefundableOrCancellable()) {
 			throw new BusinessException(ErrorCode.PAYMENT_NOT_REFUNDABLE);
 		}
 
-		// 6. 환불 처리
 		payment.refundPayment(requestDto.failReason());
 
 		Payment savedPayment = paymentRepository.save(payment);
 
-		// TODO: 7. Order 상태를 REFUNDED로 변경
+		// TODO: Order 상태를 REFUNDED로 변경
 		// orderService.updateOrderStatus(payment.getOrderId(), OrderStatus.REFUNDED);
 
 		return PaymentResponseDto.from(savedPayment, storeId);
@@ -108,29 +100,21 @@ public class PaymentServiceImpl implements PaymentService {
 
 	@Override
 	public PaymentResponseDto getPayment(UUID paymentId, Long userId, String role) {
-		// 1. UUID로 결제 조회 (한 번에!)
-		Payment payment = paymentRepository.findByPaymentPublicId(paymentId)
+
+		Payment payment = paymentRepository.findById(paymentId)
 			.orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
 
-		// TODO: 2. storeId 조회를 위해 Order 조회 필요
+		// TODO: storeId 조회를 위해 Order 조회 필요
 		// Order order = orderService.getOrder(payment.getOrderId());
 		// Long storeId = order.getStoreId();
-		Long storeId = null; // TODO: Order에서 가져오기
+		UUID storeId = null;
 
-		// 3. 권한 확인
 		validateReadPermission(payment, userId, role, storeId);
 
 		return PaymentResponseDto.from(payment, storeId);
 	}
 
-	// 내부용 메서드 - Long id로 조회 (다른 서비스에서 호출용)
-	@Transactional(readOnly = true)
-	public Payment getPaymentByIdInternal(Long paymentId) {
-		return paymentRepository.findById(paymentId)
-			.orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
-	}
-
-	private void validateRefundPermission(Payment payment, Long userId, String role, Long storeId) {
+	private void validateRefundPermission(Payment payment, Long userId, String role, UUID storeId) {
 		if ("MANAGER".equals(role) || "MASTER".equals(role)) {
 			return;
 		}
@@ -155,15 +139,14 @@ public class PaymentServiceImpl implements PaymentService {
 		throw new BusinessException(ErrorCode.PAYMENT_ACCESS_DENIED);
 	}
 
-	private void validateReadPermission(Payment payment, Long userId, String role, Long storeId) {
+	private void validateReadPermission(Payment payment, Long userId, String role, UUID storeId) {
 		if ("MANAGER".equals(role) || "MASTER".equals(role)) {
 			return;
 		}
 
 		if ("CUSTOMER".equals(role)) {
 			if (!payment.getUserId().equals(userId)) {
-				throw new BusinessException(ErrorCode.PAYMENT_ACCESS_DENIED,
-					"본인의 결제만 조회할 수 있습니다.");
+				throw new BusinessException(ErrorCode.PAYMENT_ACCESS_DENIED);
 			}
 			return;
 		}

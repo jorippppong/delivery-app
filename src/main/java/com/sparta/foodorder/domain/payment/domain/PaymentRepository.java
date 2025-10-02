@@ -7,9 +7,7 @@ public interface PaymentRepository {
 
 	Payment save(Payment payment);
 
-	Optional<Payment> findById(Long id);
+	Optional<Payment> findById(UUID id);
 
-	Optional<Payment> findByPaymentPublicId(UUID paymentPublicId);
-
-	boolean existsByOrderId(Long OrderId);
+	boolean existsByOrderId(UUID OrderId);
 }

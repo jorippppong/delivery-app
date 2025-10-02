@@ -9,7 +9,7 @@ import com.sparta.foodorder.domain.payment.domain.Payment;
 
 public interface PaymentJpaRepository extends JpaRepository<Payment, Long> {
 
-	boolean existsByOrderId(Long orderId);
+	boolean existsByOrderId(UUID orderId);
 
-	Optional<Payment> findByPaymentPublicId(UUID paymentPublicId);
+	Optional<Payment> findById(UUID id);
 }

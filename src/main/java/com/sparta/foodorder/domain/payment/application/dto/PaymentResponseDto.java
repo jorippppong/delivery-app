@@ -8,10 +8,10 @@ import com.sparta.foodorder.domain.payment.domain.PaymentMethod;
 import com.sparta.foodorder.domain.payment.domain.PaymentStatus;
 
 public record PaymentResponseDto (
-	UUID paymentPublicId,
+	UUID id,
 	Long userId,
-	Long storeId,
-	Long orderId,
+	UUID storeId,
+	UUID orderId,
 	Integer amount,
 	PaymentMethod paymentMethod,
 	PaymentStatus status,
@@ -29,9 +29,9 @@ public record PaymentResponseDto (
 	) {
 	}
 
-	public static PaymentResponseDto from(Payment payment, Long storeId) {
+	public static PaymentResponseDto from(Payment payment, UUID storeId) {
 		return new PaymentResponseDto(
-			payment.getPaymentPublicId(),
+			payment.getId(),
 			payment.getUserId(),
 			storeId,
 			payment.getOrderId(),
