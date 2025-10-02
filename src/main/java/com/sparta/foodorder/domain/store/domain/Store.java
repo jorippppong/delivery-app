@@ -30,6 +30,10 @@ public class Store extends BaseEntity {
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StoreCategory> storeCategories = new ArrayList<>();
 
+//    menu merge 전이라 임시 주석처리
+//    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Menu> menus = new ArrayList<>();
+
     @Column(nullable = false, unique = true)
     private String name;
 
