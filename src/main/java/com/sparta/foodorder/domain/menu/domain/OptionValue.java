@@ -37,7 +37,7 @@ public class OptionValue extends BaseEntity {
 
     @Builder
     public OptionValue(Option option, String value, String description,
-                       Integer addPrice, String createdBy) {
+                       Integer addPrice) {
         this.option = option;
         this.value = value;
         this.description = description;

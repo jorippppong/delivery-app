@@ -1,4 +1,6 @@
 package com.sparta.foodorder.domain.menu.infrastructure;
 
-public class MenuRepositoryImpl {
+import com.sparta.foodorder.domain.menu.domain.MenuRepository;
+
+public class MenuRepositoryImpl implements MenuRepository {
 }
