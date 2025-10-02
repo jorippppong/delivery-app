@@ -35,7 +35,15 @@ public enum ErrorCode {
     // 주소 관련 에러
     ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "A001", "주소를 찾을 수 없습니다"),
     ADDRESS_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "A002", "해당 주소에 대한 권한이 없습니다"),
-    DEFAULT_ADDRESS_EXISTS(HttpStatus.BAD_REQUEST, "A003", "이미 기본 배송지가 존재합니다");
+    DEFAULT_ADDRESS_EXISTS(HttpStatus.BAD_REQUEST, "A003", "이미 기본 배송지가 존재합니다"),
+
+    // AI 관련 에러
+    AI_PROVIDER_NOT_FOUND(HttpStatus.BAD_REQUEST, "AI001", "지원하지 않는 AI Provider입니다"),
+    AI_PROMPT_REQUIRED(HttpStatus.BAD_REQUEST, "AI002", "프롬프트는 필수입니다"),
+    AI_MODEL_NOT_FOUND(HttpStatus.BAD_REQUEST, "AI004", "지원하지 않는 AI 모델입니다"),
+    AI_EMPTY_RESPONSE(HttpStatus.INTERNAL_SERVER_ERROR, "A201", "AI가 빈 응답을 반환했습니다"),
+    AI_RESPONSE_PARSE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "A202", "AI 응답 파싱에 실패했습니다"),
+    AI_GEMINI_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "A301", "Gemini API 오류가 발생했습니다");
 
     private final HttpStatus status;
     private final String code;
