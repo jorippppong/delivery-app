@@ -16,6 +16,8 @@ import com.sparta.foodorder.domain.payment.domain.Payment;
 import com.sparta.foodorder.domain.payment.domain.PaymentRepository;
 import com.sparta.foodorder.domain.payment.domain.PaymentService;
 import com.sparta.foodorder.domain.payment.event.PaymentEvent;
+import com.sparta.foodorder.domain.store.domain.Store;
+import com.sparta.foodorder.domain.store.domain.StoreRepository;
 import com.sparta.foodorder.global.exception.BusinessException;
 import com.sparta.foodorder.global.exception.ErrorCode;
 
@@ -27,7 +29,8 @@ public class PaymentServiceImpl implements PaymentService {
 	private final StoreRepository storeRepository;
 	private final ApplicationEventPublisher eventPublisher;
 
-	public PaymentServiceImpl(PaymentRepository paymentRepository, OrderRepository orderRepository, StoreRepository storeRepository, ApplicationEventPublisher eventPublisher) {
+	public PaymentServiceImpl(PaymentRepository paymentRepository, OrderRepository orderRepository,
+		StoreRepository storeRepository, ApplicationEventPublisher eventPublisher) {
 		this.paymentRepository = paymentRepository;
 		this.orderRepository = orderRepository;
 		this.storeRepository = storeRepository;
@@ -71,12 +74,13 @@ public class PaymentServiceImpl implements PaymentService {
 			new PaymentEvent.PaymentCompleted(savedPayment.getOrderId(), savedPayment.getId())
 		);
 
-		return PaymentResponseDto.from(savedPayment , order.getStoreId());
+		return PaymentResponseDto.from(savedPayment, order.getStoreId());
 	}
 
 	@Override
 	@Transactional
-	public PaymentResponseDto refundPayment(UUID paymentId, PaymentRefundRequestDto requestDto, Long userId, String role) {
+	public PaymentResponseDto refundPayment(UUID paymentId, PaymentRefundRequestDto requestDto, Long userId,
+		String role) {
 
 		Payment payment = paymentRepository.findById(paymentId)
 			.orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
@@ -136,7 +140,9 @@ public class PaymentServiceImpl implements PaymentService {
 		}
 
 		if ("OWNER".equals(role)) {
-			Store store = storeRepository.findById(order.getStoreId()).get();
+			Store store = storeRepository.findById(order.getStoreId())
+				.orElseThrow(() -> new IllegalStateException("가게 ID는 반드시 있어야합니다."));
+
 			if (!store.getOwnerId().equals(userId)) {
 				throw new BusinessException(ErrorCode.PAYMENT_OWNER_MISMATCH);
 			}
@@ -159,13 +165,16 @@ public class PaymentServiceImpl implements PaymentService {
 		}
 
 		if ("OWNER".equals(role)) {
-			Store store = storeRepository.findById(order.getStoreId()).get();
-			if (!store.getOwnerId().equals(userId)) {
-			    throw new BusinessException(ErrorCode.PAYMENT_ACCESS_DENIED,
-			        "본인 가게의 주문만 조회할 수 있습니다.");
-			return;
-		}
+			Store store = storeRepository.findById(order.getStoreId())
+				.orElseThrow(() -> new IllegalStateException("가게 ID는 반드시 있어야합니다."));
 
-		throw new BusinessException(ErrorCode.PAYMENT_ACCESS_DENIED, "권한이 없습니다.");
+			if (!store.getOwnerId().equals(userId)) {
+				throw new BusinessException(ErrorCode.PAYMENT_ACCESS_DENIED,
+					"본인 가게의 주문만 조회할 수 있습니다.");
+				return;
+			}
+
+			throw new BusinessException(ErrorCode.PAYMENT_ACCESS_DENIED, "권한이 없습니다.");
+		}
 	}
 }
