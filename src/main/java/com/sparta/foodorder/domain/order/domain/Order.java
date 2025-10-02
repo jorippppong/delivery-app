@@ -1,6 +1,8 @@
 package com.sparta.foodorder.domain.order.domain;
 
 import com.sparta.foodorder.global.common.BaseUpdateEntity;
+import com.sparta.foodorder.global.exception.BusinessException;
+import com.sparta.foodorder.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -14,7 +16,7 @@ import java.util.UUID;
 public class Order extends BaseUpdateEntity {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(columnDefinition = "BINARY(16)")
     private UUID id;
 
@@ -38,6 +40,33 @@ public class Order extends BaseUpdateEntity {
     private Long userId;
 
     @Column(name = "store_id", nullable = false)
-    private Long storeId;
+    private UUID storeId;
 
+    public UUID getStoreId() {
+        return storeId;
+    }
+
+    public void validateOrderWriter(Long userId) {
+        if (!this.userId.equals(userId)) {
+            throw new BusinessException(ErrorCode.ORDER_CANT_ACCESS);
+        }
+    }
+
+    public void cancel() {
+        // created, pending  -> canceled
+        if (orderStatus.equals(OrderStatus.CREATED)) {
+            this.orderStatus = OrderStatus.CANCELED;
+        } else if (orderStatus.equals(OrderStatus.PENDING)) {
+            // TODO : 이벤트 전송
+            this.orderStatus = OrderStatus.CANCELED;
+        }
+        throw new BusinessException(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
+    }
+
+    public void accept() {
+        // pending -> accept
+        if (orderStatus.isAcceptable()) {
+            this.orderStatus = OrderStatus.ACCEPTED;
+        }
+    }
 }

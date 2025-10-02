@@ -1,10 +1,14 @@
 package com.sparta.foodorder.domain.order.application;
 
+import com.sparta.foodorder.domain.order.domain.Order;
+import com.sparta.foodorder.domain.order.domain.OrderRepository;
 import com.sparta.foodorder.domain.order.domain.OrderStatus;
 import com.sparta.foodorder.domain.order.presentation.dto.CreateOrderRequestDto;
 import com.sparta.foodorder.domain.order.presentation.dto.GetOrderResponseDto;
 import com.sparta.foodorder.domain.order.presentation.dto.GetStoreOrdersResponseDto;
 import com.sparta.foodorder.domain.order.presentation.dto.GetUserOrdersResponseDto;
+import com.sparta.foodorder.domain.store.domain.Store;
+import com.sparta.foodorder.domain.store.domain.StoreService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +18,8 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+    private final OrderRepository orderRepository;
+    private final StoreService storeService;
 
     // 주문 생성 (created)
     public UUID createOrder(CreateOrderRequestDto dto, Long userId) {
@@ -22,14 +28,18 @@ public class OrderService {
 
     // 결제 끝나고 주문 상태 변경 (created -> pending) : 이벤트 발행하여 처리할 예정
 
-    // (고객) created, pending,  -> canceled
+    // TODO : 결제 이벤트 발행
     public void cancelOrder(UUID orderId, Long userId) {
-
+        Order order = orderRepository.findById(orderId);
+        order.validateOrderWriter(userId);
+        order.cancel();
     }
 
-    // (사장) pending -> accept 
     public void acceptOrder(UUID orderId, Long userId) {
-
+        Order order = orderRepository.findById(orderId);
+        Store store = storeService.findById(order.getStoreId());
+        store.validateOwner(userId);
+        order.accept();
     }
 
     // (사장) pending -> reject 
