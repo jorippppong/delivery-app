@@ -18,4 +18,8 @@ public enum OrderStatus {
     OrderStatus(String description) {
         this.description = description;
     }
+
+    public boolean isAcceptable() {
+        return this == PENDING;
+    }
 }
