@@ -3,6 +3,8 @@ package com.sparta.foodorder.domain.ai.application;
 import com.sparta.foodorder.domain.ai.application.dto.AiRequestDto;
 import com.sparta.foodorder.domain.ai.application.dto.AiResponseDto;
 import com.sparta.foodorder.domain.ai.domain.AiProvider;
+import com.sparta.foodorder.global.exception.BusinessException;
+import com.sparta.foodorder.global.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -42,7 +44,7 @@ public class AiService {
 
         if (provider == null) {
             log.error("지원하지 않는 AI Provider: {}", providerName);
-            throw new IllegalArgumentException("지원하지 않는 AI Provider: " + providerName);
+            throw new BusinessException(ErrorCode.AI_PROVIDER_NOT_FOUND);
         }
 
         log.info("AI 컨텐츠 생성 요청 - Provider: {}, Prompt: {}", providerName, request.getPrompt());

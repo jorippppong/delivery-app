@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.foodorder.domain.ai.application.dto.AiRequestDto;
 import com.sparta.foodorder.domain.ai.application.dto.AiResponseDto;
 import com.sparta.foodorder.domain.ai.domain.AiProvider;
+import com.sparta.foodorder.global.exception.BusinessException;
+import com.sparta.foodorder.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,7 +53,7 @@ public class GeminiClient implements AiProvider {
             });
 
             if (responseDtoList == null || responseDtoList.isEmpty()) {
-                throw new RuntimeException("Gemini API 응답 배열이 비어있습니다.");
+                throw new BusinessException(ErrorCode.AI_EMPTY_RESPONSE);
             }
 
             String generatedText = extractGeneratedText(responseDtoList.get(0));
@@ -66,7 +68,7 @@ public class GeminiClient implements AiProvider {
 
         } catch (Exception e) {
             log.error("Gemini API 호출 실패", e);
-            throw new RuntimeException("Gemini API 호출 중 오류 발생" + e.getMessage());
+            throw new BusinessException(ErrorCode.AI_GEMINI_API_ERROR);
         }
     }
 
@@ -77,7 +79,7 @@ public class GeminiClient implements AiProvider {
 
     private String extractGeneratedText(GeminiResponseDto responseDto) {
         if (responseDto == null || responseDto.getCandidates() == null || responseDto.getCandidates().isEmpty())
-            throw new RuntimeException("Gemini API 응답이 비어있습니다");
+            throw new BusinessException(ErrorCode.AI_EMPTY_RESPONSE);
 
         return responseDto.getCandidates().get(0)
                 .getContent()
