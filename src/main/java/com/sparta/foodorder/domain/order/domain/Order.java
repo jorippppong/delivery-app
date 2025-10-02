@@ -12,12 +12,11 @@ import java.util.UUID;
 @Table(name = "p_order")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order extends BaseUpdateEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @Column(name = "order_uuid", nullable = false, unique = true, updatable = false, columnDefinition = "BINARY(16)")
-    private UUID orderUUID;
+    @Id
+    @GeneratedValue
+    @Column(columnDefinition = "BINARY(16)")
+    private UUID id;
 
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
