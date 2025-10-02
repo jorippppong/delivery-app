@@ -28,6 +28,9 @@ public enum ErrorCode {
     // 주문 관련 에러
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "O001", "주문을 찾을 수 없습니다"),
     INVALID_ORDER_STATUS(HttpStatus.BAD_REQUEST, "O002", "잘못된 주문 상태입니다"),
+    ORDER_CANT_ACCESS(HttpStatus.FORBIDDEN, "O003", "주문에 접근할 수 없습니다.(주문의 작성자, 가게의 주인만 접근 가능)"),
+    ORDER_CANCEL_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "O004", "created, pending 상태일 때만 주문 취소 가능합니다."),
+
 
     // 주소 관련 에러
     ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "A001", "주소를 찾을 수 없습니다"),

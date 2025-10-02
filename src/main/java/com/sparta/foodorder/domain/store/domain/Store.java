@@ -1,15 +1,18 @@
 package com.sparta.foodorder.domain.store.domain;
 
 import com.sparta.foodorder.global.common.BaseEntity;
+import com.sparta.foodorder.global.exception.BusinessException;
+import com.sparta.foodorder.global.exception.ErrorCode;
 import jakarta.persistence.*;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.locationtech.jts.geom.Point;
+
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table(name = "p_store")
@@ -70,8 +73,8 @@ public class Store extends BaseEntity {
     private LocalTime closesAt;
 
     private Store(Long ownerId, String name, String address, Point location,
-        String phoneNumber, Long minOrderAmount, Long deliveryFee,
-        LocalTime opensAt, LocalTime closesAt) {
+                  String phoneNumber, Long minOrderAmount, Long deliveryFee,
+                  LocalTime opensAt, LocalTime closesAt) {
         this.ownerId = ownerId;
         this.name = name;
         this.address = address;
@@ -87,6 +90,12 @@ public class Store extends BaseEntity {
     public void generateStorePublicId() {
         if (this.storePublicId == null) {
             this.storePublicId = UUID.randomUUID();
+        }
+    }
+
+    public void validateOwner(Long userId) {
+        if (!this.ownerId.equals(userId)) {
+            throw new BusinessException(ErrorCode.ORDER_CANT_ACCESS);
         }
     }
 }

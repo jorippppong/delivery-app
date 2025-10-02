@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "p_order_menu")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -14,11 +16,11 @@ public class OrderMenu extends BaseCreateEntity {
     private Long id;
 
     @Column(name = "order_id", nullable = false)
-    private Long orderId;
+    private UUID orderId;
 
     // menu snapshot이 있는데, id까지 필요할까..? (nullable 여부 고민)
     @Column(name = "menu_id")
-    private Long menuId;
+    private UUID menuId;
 
     @Column(name = "quantity", nullable = false)
     private int quantity;
