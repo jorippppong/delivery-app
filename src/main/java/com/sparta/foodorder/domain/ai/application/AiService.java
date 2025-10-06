@@ -19,20 +19,24 @@ import java.util.stream.Collectors;
 public class AiService {
 
     private final Map<String, AiProvider> providers;
+    private final PromptBuilder promptBuilder;
 
     @Value("${ai.default-provider:gemini}")
     private String defaultProvider;
 
-    public AiService(List<AiProvider> providerList) {
+    public AiService(List<AiProvider> providerList, PromptBuilder promptBuilder) {
         this.providers = providerList.stream()
                 .collect(Collectors.toMap(AiProvider::getProviderName, Function.identity()));
+        this.promptBuilder = promptBuilder;
     }
 
-    public AiResponseDto generateContent(String prompt) {
-        return generateContent(prompt, defaultProvider);
+    public AiResponseDto generateContent(String productName, String content) {
+        return generateContent(productName, content, defaultProvider);
     }
 
-    public AiResponseDto generateContent(String prompt, String providerName) {
+    public AiResponseDto generateContent(String productName, String content, String providerName) {
+        String prompt = promptBuilder.buildProductGeneratePrompt(productName, content);
+
         AiRequestDto request = AiRequestDto.builder()
                 .prompt(prompt)
                 .build();
@@ -47,7 +51,7 @@ public class AiService {
             throw new BusinessException(ErrorCode.AI_PROVIDER_NOT_FOUND);
         }
 
-        log.info("AI 컨텐츠 생성 요청 - Provider: {}, Prompt: {}", providerName, request.getPrompt());
+        log.info("AI 컨텐츠 생성 요청 - Provider: {}", providerName);
         return provider.generateContent(request);
     }
 }
