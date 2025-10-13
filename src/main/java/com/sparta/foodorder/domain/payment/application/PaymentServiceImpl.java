@@ -41,8 +41,10 @@ public class PaymentServiceImpl implements PaymentService {
 	@Transactional
 	public PaymentResponseDto createPayment(PaymentCreateRequestDto requestDto, Long userId) {
 
-		Order order = orderRepository.findById(requestDto.orderId())
-			.orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
+		Order order = orderRepository.findById(requestDto.orderId());
+		if (order == null) {
+			throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
+		}
 
 		if (!order.getUserId().equals(userId)) {
 			throw new BusinessException(ErrorCode.PAYMENT_ACCESS_DENIED, "본인의 주문만 결제할 수 있습니다.");
@@ -85,12 +87,14 @@ public class PaymentServiceImpl implements PaymentService {
 		Payment payment = paymentRepository.findById(paymentId)
 			.orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
 
-		Order order = orderRepository.findById(payment.getOrderId())
-			.orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
+		Order order = orderRepository.findById(payment.getOrderId());
+		if (order == null) {
+			throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
+		}
 
 		validatePermission(payment, order, userId, role);
 
-		if ("CUSTOMER".equals(role) && !payment.isRefundableWithinTimeLimit()) {
+		if ("USER".equals(role) && !payment.isRefundableWithinTimeLimit()) {
 			throw new BusinessException(ErrorCode.PAYMENT_REFUND_TIME_EXPIRED);
 		}
 
@@ -119,8 +123,10 @@ public class PaymentServiceImpl implements PaymentService {
 		Payment payment = paymentRepository.findById(paymentId)
 			.orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
 
-		Order order = orderRepository.findById(payment.getOrderId())
-			.orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
+		Order order = orderRepository.findById(payment.getOrderId());
+		if (order == null) {
+			throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
+		}
 
 		validatePermission(payment, order, userId, role);
 
