@@ -2,7 +2,9 @@ package com.sparta.foodorder.domain.ai.application;
 
 import com.sparta.foodorder.domain.ai.application.dto.AiRequestDto;
 import com.sparta.foodorder.domain.ai.application.dto.AiResponseDto;
+import com.sparta.foodorder.domain.ai.domain.AiLog;
 import com.sparta.foodorder.domain.ai.domain.AiProvider;
+import com.sparta.foodorder.domain.ai.infrastructure.AiLogRepository;
 import com.sparta.foodorder.global.exception.BusinessException;
 import com.sparta.foodorder.global.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
@@ -20,14 +22,16 @@ public class AiService {
 
     private final Map<String, AiProvider> providers;
     private final PromptBuilder promptBuilder;
+    private final AiLogRepository aiLogRepository;
 
     @Value("${ai.default-provider:gemini}")
     private String defaultProvider;
 
-    public AiService(List<AiProvider> providerList, PromptBuilder promptBuilder) {
+    public AiService(List<AiProvider> providerList, PromptBuilder promptBuilder, AiLogRepository aiLogRepository) {
         this.providers = providerList.stream()
                 .collect(Collectors.toMap(AiProvider::getProviderName, Function.identity()));
         this.promptBuilder = promptBuilder;
+        this.aiLogRepository = aiLogRepository;
     }
 
     public AiResponseDto generateContent(String productName, String content) {
@@ -38,6 +42,8 @@ public class AiService {
         String prompt = promptBuilder.buildProductGeneratePrompt(productName, content);
 
         AiRequestDto request = AiRequestDto.builder()
+                .productName(productName)
+                .content(content)
                 .prompt(prompt)
                 .build();
         return generateContent(request, providerName);
@@ -52,6 +58,20 @@ public class AiService {
         }
 
         log.info("AI 컨텐츠 생성 요청 - Provider: {}", providerName);
-        return provider.generateContent(request);
+        AiResponseDto aiResponseDto = provider.generateContent(request);
+
+        // TODO. 유저 ID 받아서 적용 필요
+        AiLog aiLog = AiLog.builder()
+                .userId(1L)  // TODO. 수정필요
+                .aiModel(aiResponseDto.getModel())
+                .productName(request.getProductName())
+                .requestContent(request.getContent())
+                .requestType(AiLog.RequestType.MENU_DESCRIPTION)
+                .responseContent(aiResponseDto.getGeneratedText())
+                .status(AiLog.Status.SUCCESS)
+                .build();
+
+        aiLogRepository.save(aiLog);
+        return aiResponseDto;
     }
 }
