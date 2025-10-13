@@ -5,6 +5,7 @@ import com.sparta.foodorder.domain.auth.infrastructure.CustomUserDetails;
 import com.sparta.foodorder.domain.menu.application.MenuService;
 import com.sparta.foodorder.domain.menu.presentation.dto.MenuCreateRequestDto;
 import com.sparta.foodorder.domain.menu.presentation.dto.MenuResponseDto;
+import com.sparta.foodorder.domain.menu.presentation.dto.MenuUpdateRequestDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,4 +61,19 @@ public class MenuController {
             return ResponseEntity.ok(responseDto);
         }
     }
+
+
+    @PreAuthorize("hasRole('OWNER')")
+    @PutMapping("/{menuId}")
+    public ResponseEntity<MenuResponseDto> updateMenu(@PathVariable UUID storeId,
+                                                      @PathVariable UUID menuId,
+                                                      @RequestBody @Valid MenuUpdateRequestDto requestDto,
+                                                      @AuthenticationPrincipal CustomUserDetails user) {
+        Long userId = user.getUserId();
+        MenuResponseDto responseDto = menuService.updateMenu(storeId, menuId, requestDto, userId);
+
+        return ResponseEntity.ok(responseDto);
+    }
+
+
 }

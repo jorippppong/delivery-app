@@ -5,10 +5,12 @@ import com.sparta.foodorder.domain.menu.domain.Menu;
 import com.sparta.foodorder.domain.menu.domain.MenuRepository;
 import com.sparta.foodorder.domain.menu.presentation.dto.MenuCreateRequestDto;
 import com.sparta.foodorder.domain.menu.presentation.dto.MenuResponseDto;
+import com.sparta.foodorder.domain.menu.presentation.dto.MenuUpdateRequestDto;
 import com.sparta.foodorder.domain.store.domain.Store;
 import com.sparta.foodorder.domain.store.domain.StoreService;
 import com.sparta.foodorder.global.exception.BusinessException;
 import com.sparta.foodorder.global.exception.ErrorCode;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -48,7 +50,6 @@ public class MenuService {
     public List<MenuResponseDto> getMenus(UUID storeId, CustomUserDetails user) {
         Store store = storeService.findById(storeId);
         List<Menu> menu;
-        List<MenuResponseDto> responseDto;
 
         if(user.getUser().getRole().toString().equals("USER") || !store.getOwnerId().equals(user.getUserId())) {
             menu = menuRepository.findByStoreIdAndActiveTrueAndHiddenFalseAndDeletedAtIsNull(storeId);
@@ -105,5 +106,30 @@ public class MenuService {
 
         } else throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND); //가게정보가 일치하지 않으면 예외처리
 
+    }
+
+    public MenuResponseDto updateMenu(UUID storeId, UUID menuId, @Valid MenuUpdateRequestDto requestDto, Long userId) {
+        //가게 존재 및 소유자 검증
+        Store store = storeService.findById(storeId);
+        store.validateOwner(userId);
+
+        //메뉴 존재 검증
+        Menu menu = menuRepository.findById(menuId).orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+        if(menu.isDeleted()) throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND);
+
+        //메뉴가 해당 가게 아래에 있는 메뉴가 맞는지
+        if(menu.getStore().getId().equals(storeId)) {
+            menu.changeMenu(
+                    requestDto.getName(),
+                    requestDto.getDescription(),
+                    requestDto.getPrice(),
+                    requestDto.isHidden(),
+                    requestDto.isActive()
+            );
+            Menu savedMenu = menuRepository.save(menu);
+            MenuResponseDto responseDto = MenuResponseDto.from(savedMenu);
+
+            return responseDto;
+        } else throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND);
     }
 }
