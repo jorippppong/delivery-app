@@ -45,7 +45,15 @@ public enum ErrorCode {
     PAYMENT_REFUND_TIME_EXPIRED(HttpStatus.BAD_REQUEST, "PAY005", "환불 가능 시간이 초과되었습니다"),
     PAYMENT_ALREADY_REFUNDED(HttpStatus.BAD_REQUEST, "PAY006", "이미 환불된 결제입니다"),
     PAYMENT_USER_MISMATCH(HttpStatus.FORBIDDEN, "PAY007", "본인의 결제만 처리할 수 있습니다"),
-    PAYMENT_OWNER_MISMATCH(HttpStatus.FORBIDDEN, "PAY008", "본인 가게의 주문만 처리할 수 있습니다");
+    PAYMENT_OWNER_MISMATCH(HttpStatus.FORBIDDEN, "PAY008", "본인 가게의 주문만 처리할 수 있습니다"),
+
+    // AI 관련 에러
+    AI_PROVIDER_NOT_FOUND(HttpStatus.BAD_REQUEST, "AI001", "지원하지 않는 AI Provider입니다"),
+    AI_PROMPT_REQUIRED(HttpStatus.BAD_REQUEST, "AI002", "프롬프트는 필수입니다"),
+    AI_MODEL_NOT_FOUND(HttpStatus.BAD_REQUEST, "AI004", "지원하지 않는 AI 모델입니다"),
+    AI_EMPTY_RESPONSE(HttpStatus.INTERNAL_SERVER_ERROR, "A201", "AI가 빈 응답을 반환했습니다"),
+    AI_RESPONSE_PARSE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "A202", "AI 응답 파싱에 실패했습니다"),
+    AI_GEMINI_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "A301", "Gemini API 오류가 발생했습니다");
 
     private final HttpStatus status;
     private final String code;
