@@ -21,9 +21,8 @@ public enum ErrorCode {
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "U003", "비밀번호가 일치하지 않습니다"),
     UNAUTHORIZED_USER(HttpStatus.UNAUTHORIZED, "U004", "인증되지 않은 사용자입니다"),
 
-    // 상품 관련 에러
-    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "P001", "상품을 찾을 수 없습니다"),
-    OUT_OF_STOCK(HttpStatus.BAD_REQUEST, "P002", "재고가 부족합니다"),
+    // 메뉴 관련 에러
+    MENU_NOT_FOUND(HttpStatus.NOT_FOUND, "M001", "존재하지 않는 메뉴입니다."),
 
     // 주문 관련 에러
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "O001", "주문을 찾을 수 없습니다"),
@@ -35,6 +34,7 @@ public enum ErrorCode {
     ORDER_READY_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "O007", "accept 상태일 때만 주문 취소 가능합니다."),
     ORDER_DELIVER_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "O008", "ready 상태일 때만 주문 취소 가능합니다."),
     ORDER_COMPLETE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "O009", "delivering 상태일 때만 주문 취소 가능합니다."),
+    ORDER_MEMO_LENGTH(HttpStatus.BAD_REQUEST, "O010", "주문의 메모는 200자 이하입니다."),
 
     // 주소 관련 에러
     ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "A001", "주소를 찾을 수 없습니다"),

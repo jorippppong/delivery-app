@@ -18,4 +18,9 @@ public class OrderRepositoryImpl implements OrderRepository {
     public Optional<Order> findById(UUID orderId) {
         return orderJpaRepository.findById(orderId);
     }
+
+    @Override
+    public UUID save(Order order) {
+        return orderJpaRepository.save(order).getId();
+    }
 }

@@ -99,4 +99,11 @@ public class StoreServiceImpl implements StoreService {
         return storeRepository.findById(storeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
     }
+
+    @Override
+    public void validateExistenceById(UUID storeId) {
+        if (!storeRepository.existsById(storeId)) {
+            throw new BusinessException(ErrorCode.STORE_NOT_FOUND);
+        }
+    }
 }

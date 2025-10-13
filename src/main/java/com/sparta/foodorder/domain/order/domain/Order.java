@@ -17,6 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order extends BaseUpdateEntity {
 
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(columnDefinition = "BINARY(16)")
@@ -32,20 +33,33 @@ public class Order extends BaseUpdateEntity {
     @Column(name = "total_price", nullable = false)
     private int totalPrice;
 
-    @Column(name = "delivery_address", nullable = false)
-    private String deliveryAddress;
+    @Column(name = "address_line", nullable = false)
+    private String addressLine;
 
     @Column(name = "detail_address", nullable = false)
     private String detailAddress;
 
+    @Column(name = "memo", length = 200)
+    private String memo;
+
     @Column(name = "user_id", nullable = false)
     private Long userId;
 
+    @Getter
     @Column(name = "store_id", nullable = false)
     private UUID storeId;
 
-    public UUID getStoreId() {
-        return storeId;
+    public Order(Long userId, UUID storeId, String addressLine, String detailAddress, int totalPrice, String memo) {
+        validateMemo(memo);
+
+        this.orderStatus = OrderStatus.CREATED;
+        this.orderedAt = LocalDateTime.now();
+        this.totalPrice = totalPrice;
+        this.addressLine = addressLine;
+        this.detailAddress = detailAddress;
+        this.memo = memo.trim();
+        this.userId = userId;
+        this.storeId = storeId;
     }
 
     public void validateOrderWriter(Long userId) {
@@ -103,5 +117,11 @@ public class Order extends BaseUpdateEntity {
             throw new BusinessException(ErrorCode.ORDER_COMPLETE_NOT_ALLOWED);
         }
         this.orderStatus = OrderStatus.COMPLETE;
+    }
+
+    private void validateMemo(String memo) {
+        if (memo != null && memo.trim().length() > 200) {
+            throw new BusinessException(ErrorCode.ORDER_MEMO_LENGTH);
+        }
     }
 }

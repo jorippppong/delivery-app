@@ -13,4 +13,6 @@ public interface StoreRepository {
     boolean existsByPhoneNumber(String phoneNumber);
 
     Optional<Store> findById(UUID id);
+
+    boolean existsById(UUID id);
 }

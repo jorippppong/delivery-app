@@ -51,4 +51,6 @@ public interface StoreService {
     List<StoreResponseDto> getStoresByCategory(UUID categoryId);
 
     Store findByUUID(UUID storeId);
+
+    void validateExistenceById(UUID storeId);
 }
