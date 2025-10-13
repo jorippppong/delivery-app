@@ -54,7 +54,7 @@ public class PaymentController {
 		@AuthenticationPrincipal CustomUserDetails userDetails
 	) {
 		PaymentResponseDto paymentResponseDto =
-			paymentService.refundPayment(paymentId, paymentRefundRequestDto, userDetails.getUserId(), userDetails.getUser().getRole().name());
+			paymentService.refundPayment(paymentId, paymentRefundRequestDto, userDetails.getUserId(), userDetails.getUser().getRole());
 
 		return ResponseEntity.ok(paymentResponseDto);
 	}
@@ -66,7 +66,7 @@ public class PaymentController {
 		@PathVariable UUID paymentId,
 		@AuthenticationPrincipal CustomUserDetails userDetails
 	) {
-		PaymentResponseDto paymentResponseDto = paymentService.getPayment(paymentId, userDetails.getUserId(), userDetails.getUser().getRole().name());
+		PaymentResponseDto paymentResponseDto = paymentService.getPayment(paymentId, userDetails.getUserId(), userDetails.getUser().getRole());
 
 		return ResponseEntity.ok(paymentResponseDto);
 	}

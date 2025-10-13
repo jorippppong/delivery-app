@@ -18,6 +18,7 @@ import com.sparta.foodorder.domain.payment.domain.PaymentService;
 import com.sparta.foodorder.domain.payment.event.PaymentEvent;
 import com.sparta.foodorder.domain.store.domain.Store;
 import com.sparta.foodorder.domain.store.domain.StoreRepository;
+import com.sparta.foodorder.domain.user.domain.UserRole;
 import com.sparta.foodorder.global.exception.BusinessException;
 import com.sparta.foodorder.global.exception.ErrorCode;
 
@@ -41,17 +42,15 @@ public class PaymentServiceImpl implements PaymentService {
 	@Transactional
 	public PaymentResponseDto createPayment(PaymentCreateRequestDto requestDto, Long userId) {
 
-		Order order = orderRepository.findById(requestDto.orderId());
-		if (order == null) {
-			throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
-		}
+		Order order = orderRepository.findById(requestDto.orderId())
+			.orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
 
 		if (!order.getUserId().equals(userId)) {
-			throw new BusinessException(ErrorCode.PAYMENT_ACCESS_DENIED, "본인의 주문만 결제할 수 있습니다.");
+			throw new BusinessException(ErrorCode.PAYMENT_USER_MISMATCH);
 		}
 
 		if (order.getOrderStatus() != OrderStatus.CREATED) {
-			throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS, "결제 가능한 주문 상태가 아닙니다.");
+			throw new BusinessException(ErrorCode.INVALID_ORDER_STATUS);
 		}
 
 		if (paymentRepository.existsByOrderId(requestDto.orderId())) {
@@ -81,20 +80,17 @@ public class PaymentServiceImpl implements PaymentService {
 
 	@Override
 	@Transactional
-	public PaymentResponseDto refundPayment(UUID paymentId, PaymentRefundRequestDto requestDto, Long userId,
-		String role) {
+	public PaymentResponseDto refundPayment(UUID paymentId, PaymentRefundRequestDto requestDto, Long userId, UserRole role) {
 
 		Payment payment = paymentRepository.findById(paymentId)
 			.orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
 
-		Order order = orderRepository.findById(payment.getOrderId());
-		if (order == null) {
-			throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
-		}
+		Order order = orderRepository.findById(payment.getOrderId())
+			.orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
 
 		validatePermission(payment, order, userId, role);
 
-		if ("USER".equals(role) && !payment.isRefundableWithinTimeLimit()) {
+		if (role == UserRole.USER && !payment.isRefundableWithinTimeLimit()) {
 			throw new BusinessException(ErrorCode.PAYMENT_REFUND_TIME_EXPIRED);
 		}
 
@@ -118,43 +114,41 @@ public class PaymentServiceImpl implements PaymentService {
 	}
 
 	@Override
-	public PaymentResponseDto getPayment(UUID paymentId, Long userId, String role) {
+	public PaymentResponseDto getPayment(UUID paymentId, Long userId, UserRole role) {
 
 		Payment payment = paymentRepository.findById(paymentId)
 			.orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
 
-		Order order = orderRepository.findById(payment.getOrderId());
-		if (order == null) {
-			throw new BusinessException(ErrorCode.ORDER_NOT_FOUND);
-		}
+		Order order = orderRepository.findById(payment.getOrderId())
+			.orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
 
 		validatePermission(payment, order, userId, role);
 
 		return PaymentResponseDto.from(payment, order.getStoreId());
 	}
 
-	private void validatePermission(Payment payment, Order order, Long userId, String role) {
-		if ("MANAGER".equals(role) || "MASTER".equals(role)) {
+	private void validatePermission(Payment payment, Order order, Long userId, UserRole role) {
+		if (role == UserRole.MANAGER || role == UserRole.ADMIN) {
 			return;
 		}
 
-		if ("CUSTOMER".equals(role)) {
+		if (role == UserRole.USER) {
 			if (!payment.getUserId().equals(userId)) {
-				throw new BusinessException(ErrorCode.PAYMENT_ACCESS_DENIED, "본인의 결제만 접근할 수 있습니다.");
+				throw new BusinessException(ErrorCode.PAYMENT_USER_MISMATCH);
 			}
 			return;
 		}
 
-		if ("OWNER".equals(role)) {
+		if (role == UserRole.OWNER) {
 			Store store = storeRepository.findById(order.getStoreId())
-				.orElseThrow(() -> new IllegalStateException("가게 ID는 반드시 있어야합니다."));
+				.orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
 
 			if (!store.getOwnerId().equals(userId)) {
-				throw new BusinessException(ErrorCode.PAYMENT_ACCESS_DENIED, "본인 가게의 주문만 접근할 수 있습니다.");
+				throw new BusinessException(ErrorCode.PAYMENT_OWNER_MISMATCH);
 			}
 			return;
 		}
 
-		throw new BusinessException(ErrorCode.PAYMENT_ACCESS_DENIED, "권한이 없습니다.");
+		throw new BusinessException(ErrorCode.PAYMENT_ACCESS_DENIED);
 	}
 }
