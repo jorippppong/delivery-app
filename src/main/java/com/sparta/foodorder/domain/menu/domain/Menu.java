@@ -1,9 +1,9 @@
 package com.sparta.foodorder.domain.menu.domain;
 
+import com.sparta.foodorder.domain.store.domain.Store;
 import com.sparta.foodorder.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -18,45 +18,53 @@ import java.util.UUID;
 public class Menu extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "menu_id", nullable = false, unique = true, updatable =false,  columnDefinition = "BINARY(16)")
-    private UUID menuId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    private UUID id;
 
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "description")//lob추가할것
+    @Column(name = "description")
     private String description;
 
     @Column(name = "price")
     private Integer price; //가격은 int로 ?
 
-    //@ManyToOne(fetch = FetchType.LAZY)
-    //@JoinColumn(name = "store_id")
-    //@Column(name = "store_id")
-    //private Store store;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_id")
+    private Store store;
 
     @Column(name = "is_hidden")
-    private boolean isHidden;
+    private boolean hidden = false;
 
     @Column(name = "is_active")
-    private boolean isActive;
+    private boolean active = true;
 
-    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "menu", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private List<Option> options = new ArrayList<>();
 
-    @Builder
-    public Menu(String name, String description, Integer price, Long storeId,
-                Boolean isHidden, Boolean isActive) {
+    private Menu(String name, String description, Integer price, Store store,
+                 boolean hidden, boolean active, List<Option> options) {
         this.name = name;
         this.description = description;
         this.price = price;
-        //this.storeId = storeId;
-        this.isHidden = isHidden != null ? isHidden : false;
-        this.isActive = isActive != null ? isActive : true;
+        this.store = store;
+        this.hidden = hidden;
+        this.active = active;
+        this.options = options != null ? options : new ArrayList<>();
 
+    }
+
+    public static Menu create(String name, String description, Integer price,
+                              Store store, boolean hidden, boolean active,
+                              List<Option> options) {
+        return new Menu(name, description, price, store, hidden, active, options);
+    }
+
+
+        public void deleteMenu (String username) {
+            super.softDelete(username);
     }
 
 
