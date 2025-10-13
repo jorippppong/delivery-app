@@ -60,7 +60,9 @@ public enum ErrorCode {
     OWNER_ALREADY_HAS_STORE(HttpStatus.CONFLICT, "S003", "한 명의 사장님은 하나의 가게만 등록 가능합니다."),
     PHONE_ALREADY_EXIST(HttpStatus.CONFLICT, "S004", "이미 존재하는 전화번호입니다."),
     STORE_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "S005", "가게에 대한 접근권한이 없습니다."),
-    CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "S006", "카테고리를 찾을 수 없습니다.");
+    CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "S006", "카테고리를 찾을 수 없습니다."),
+    CATEGORY_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "S007", "카테고리에 대한 접근권한이 없습니다."),
+    CATEGORY_ALREADY_EXIST(HttpStatus.CONFLICT, "S008", "이미 존재하는 카테고리입니다.");
 
     private final HttpStatus status;
     private final String code;
