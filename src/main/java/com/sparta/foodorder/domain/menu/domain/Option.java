@@ -15,11 +15,9 @@ import java.util.UUID;
 public class Option extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(name = "option_id", unique = true, nullable = false, updatable = false, columnDefinition = "BINARY(16)")
-    private UUID optionId;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id")
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "menu_id", nullable = false)
