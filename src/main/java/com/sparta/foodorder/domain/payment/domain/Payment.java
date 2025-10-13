@@ -9,8 +9,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -22,16 +23,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Payment extends BaseUpdateEntity {
 
+	private static final int REFUND_TIME_LIMIT_MINUTES = 5;
+
 	@Id
+	@GeneratedValue(strategy = GenerationType.UUID)
 	@Column(columnDefinition = "BINARY(16)", nullable = false)
 	private UUID id;
-
-	@PrePersist
-	public void generateId() {
-		if (this.id == null) {
-			this.id = UUID.randomUUID();
-		}
-	}
 
 	@Column(name = "user_id", nullable = false)
 	private Long userId;
@@ -106,7 +103,7 @@ public class Payment extends BaseUpdateEntity {
 		if (this.paidAt == null) {
 			return false;
 		}
-		LocalDateTime fiveMinutesAfterPaid = this.paidAt.plusMinutes(5);
+		LocalDateTime fiveMinutesAfterPaid = this.paidAt.plusMinutes(REFUND_TIME_LIMIT_MINUTES);
 		return LocalDateTime.now().isBefore(fiveMinutesAfterPaid);
 	}
 }

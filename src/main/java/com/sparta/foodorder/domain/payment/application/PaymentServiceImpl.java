@@ -128,27 +128,26 @@ public class PaymentServiceImpl implements PaymentService {
 	}
 
 	private void validatePermission(Payment payment, Order order, Long userId, UserRole role) {
-		if (role == UserRole.MANAGER || role == UserRole.ADMIN) {
-			return;
+		switch (role) {
+			case MANAGER, ADMIN -> {}
+			case USER -> validateUserPermission(payment, userId);
+			case OWNER -> validateOwnerPermission(order, userId);
+			default -> throw new BusinessException(ErrorCode.PAYMENT_ACCESS_DENIED);
 		}
+	}
 
-		if (role == UserRole.USER) {
-			if (!payment.getUserId().equals(userId)) {
-				throw new BusinessException(ErrorCode.PAYMENT_USER_MISMATCH);
-			}
-			return;
+	private void validateUserPermission(Payment payment, Long userId) {
+		if (!payment.getUserId().equals(userId)) {
+			throw new BusinessException(ErrorCode.PAYMENT_USER_MISMATCH);
 		}
+	}
 
-		if (role == UserRole.OWNER) {
-			Store store = storeRepository.findById(order.getStoreId())
-				.orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
+	private void validateOwnerPermission(Order order, Long userId) {
+		Store store = storeRepository.findById(order.getStoreId())
+			.orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
 
-			if (!store.getOwnerId().equals(userId)) {
-				throw new BusinessException(ErrorCode.PAYMENT_OWNER_MISMATCH);
-			}
-			return;
+		if (!store.getOwnerId().equals(userId)) {
+			throw new BusinessException(ErrorCode.PAYMENT_OWNER_MISMATCH);
 		}
-
-		throw new BusinessException(ErrorCode.PAYMENT_ACCESS_DENIED);
 	}
 }
