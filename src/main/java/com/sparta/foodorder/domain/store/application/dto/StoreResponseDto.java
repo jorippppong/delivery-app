@@ -19,11 +19,11 @@ public record StoreResponseDto(
     Long ratingCount,
     Float ratingAvg,
     Long deliveryFee,
-    Long minIOrderAmount,
+    Long minOrderAmount,
     LocalTime opensAt,
     LocalTime closesAt,
     LocalDateTime createdAt,
-    LocalDateTime updateAt
+    LocalDateTime updatedAt
 ) {
 
     public static StoreResponseDto from(Store store) {
@@ -39,11 +39,11 @@ public record StoreResponseDto(
             .ratingCount(store.getRatingCount())
             .ratingAvg(store.getRatingAvg())
             .deliveryFee(store.getDeliveryFee())
-            .minIOrderAmount(store.getMinOrderAmount())
+            .minOrderAmount(store.getMinOrderAmount())
             .opensAt(store.getOpensAt())
             .closesAt(store.getClosesAt())
             .createdAt(store.getCreatedAt())
-            .updateAt(store.getUpdatedAt())
+            .updatedAt(store.getUpdatedAt())
             .build();
     }
 }
