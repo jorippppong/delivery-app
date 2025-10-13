@@ -79,6 +79,10 @@ public class CustomUserDetails implements UserDetails {
         return roles;
     }
 
+    public UserRole getRole() {
+        return roles.iterator().next();
+    }
+
     public UserStatus getStatus() {
         return status;
     }
