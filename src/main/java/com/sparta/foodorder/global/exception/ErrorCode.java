@@ -20,6 +20,15 @@ public enum ErrorCode {
     DUPLICATE_EMAIL(HttpStatus.CONFLICT, "U002", "이미 존재하는 이메일입니다"),
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "U003", "비밀번호가 일치하지 않습니다"),
     UNAUTHORIZED_USER(HttpStatus.UNAUTHORIZED, "U004", "인증되지 않은 사용자입니다"),
+    DUPLICATE_NICKNAME(HttpStatus.CONFLICT, "U005", "이미 존재하는 닉네임입니다"),
+    INVALID_EMAIL_FORMAT(HttpStatus.BAD_REQUEST, "U006", "잘못된 이메일 형식입니다"),
+    INVALID_PASSWORD_FORMAT(HttpStatus.BAD_REQUEST, "U007", "비밀번호는 최소 8자 이상이며, 영문, 숫자, 특수문자를 포함해야 합니다"),
+    SAME_PASSWORD(HttpStatus.BAD_REQUEST, "U008", "현재 비밀번호와 새 비밀번호가 동일합니다"),
+    INVALID_NAME_FORMAT(HttpStatus.BAD_REQUEST, "U009", "이름은 한글 또는 영문만 입력 가능합니다"),
+    USER_DEACTIVATED(HttpStatus.FORBIDDEN, "U010", "탈퇴한 사용자입니다"),
+    USER_BANNED(HttpStatus.FORBIDDEN, "U011", "제재된 사용자입니다"),
+    USER_WITHDRAWN(HttpStatus.FORBIDDEN, "U012", "탈퇴 처리된 사용자입니다"),
+    INVALID_USER_STATUS(HttpStatus.BAD_REQUEST, "U013", "잘못된 사용자 상태입니다"),
 
     // 상품 관련 에러
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "P001", "상품을 찾을 수 없습니다"),
@@ -32,7 +41,18 @@ public enum ErrorCode {
     // 주소 관련 에러
     ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "A001", "주소를 찾을 수 없습니다"),
     ADDRESS_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "A002", "해당 주소에 대한 권한이 없습니다"),
-    DEFAULT_ADDRESS_EXISTS(HttpStatus.BAD_REQUEST, "A003", "이미 기본 배송지가 존재합니다");
+    DEFAULT_ADDRESS_EXISTS(HttpStatus.BAD_REQUEST, "A003", "이미 기본 배송지가 존재합니다"),
+    INVALID_POSTAL_CODE(HttpStatus.BAD_REQUEST, "A004", "우편번호는 5자리 숫자여야 합니다"),
+    ADDRESS_DELETED(HttpStatus.GONE, "A005", "삭제된 주소입니다"),
+    ADDRESS_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "A006", "주소는 최대 10개까지 등록할 수 있습니다"),
+    DEFAULT_ADDRESS_DELETE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "A007", "기본 배송지는 삭제할 수 없습니다"),
+    
+    // 인증 관련 에러
+    TOO_MANY_LOGIN_ATTEMPTS(HttpStatus.TOO_MANY_REQUESTS, "AUTH001", "로그인 시도 횟수를 초과했습니다"),
+    INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH002", "유효하지 않은 토큰입니다"),
+    TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "AUTH003", "만료된 토큰입니다"),
+    TOKEN_TAMPERED(HttpStatus.UNAUTHORIZED, "AUTH004", "변조된 토큰입니다"),
+    REFRESH_TOKEN_REUSED(HttpStatus.UNAUTHORIZED, "AUTH005", "재사용된 리프레시 토큰입니다");
 
     private final HttpStatus status;
     private final String code;

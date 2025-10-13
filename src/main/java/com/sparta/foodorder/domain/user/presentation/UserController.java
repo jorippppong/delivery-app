@@ -1,5 +1,6 @@
 package com.sparta.foodorder.domain.user.presentation;
 
+import com.sparta.foodorder.domain.auth.infrastructure.CustomUserDetails;
 import com.sparta.foodorder.domain.user.application.dto.SignupRequestDto;
 import com.sparta.foodorder.domain.user.application.dto.UpdatePasswordRequestDto;
 import com.sparta.foodorder.domain.user.application.dto.UpdateProfileRequestDto;
@@ -12,6 +13,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "사용자", description = "사용자 관련 API")
@@ -29,35 +32,41 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @Operation(summary = "사용자 조회", description = "사용자 정보를 조회합니다")
-    @GetMapping("/{userEmail}")
-    public ResponseEntity<UserResponseDto> getUser(@PathVariable String userEmail) {
-        UserResponseDto response = userService.getUser(userEmail);
+    @Operation(summary = "내 정보 조회", description = "현재 로그인한 사용자의 정보를 조회합니다 (본인만 가능)")
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserResponseDto> getMyInfo(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        UserResponseDto response = userService.getUser(userDetails.getUsername());
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "프로필 수정", description = "사용자 프로필을 수정합니다")
-    @PutMapping("/{userEmail}")
+    @Operation(summary = "프로필 수정", description = "현재 로그인한 사용자의 프로필을 수정합니다 (본인만 가능)")
+    @PutMapping("/me")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserResponseDto> updateProfile(
-            @PathVariable String userEmail,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody UpdateProfileRequestDto request) {
-        UserResponseDto response = userService.updateProfile(userEmail, request);
+        UserResponseDto response = userService.updateProfile(userDetails.getUsername(), request);
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "비밀번호 변경", description = "사용자 비밀번호를 변경합니다")
-    @PutMapping("/{userEmail}/password")
+    @Operation(summary = "비밀번호 변경", description = "현재 로그인한 사용자의 비밀번호를 변경합니다 (본인만 가능)")
+    @PutMapping("/me/password")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> updatePassword(
-            @PathVariable String userEmail,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody UpdatePasswordRequestDto request) {
-        userService.updatePassword(userEmail, request);
+        userService.updatePassword(userDetails.getUsername(), request);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "사용자 비활성화", description = "사용자를 비활성화합니다")
-    @DeleteMapping("/{userEmail}")
-    public ResponseEntity<Void> deactivateUser(@PathVariable String userEmail) {
-        userService.deactivateUser(userEmail);
+    @Operation(summary = "회원 탈퇴", description = "현재 로그인한 사용자를 비활성화합니다 (본인만 가능)")
+    @DeleteMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> deactivateUser(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.deactivateUser(userDetails.getUsername());
         return ResponseEntity.noContent().build();
     }
 }

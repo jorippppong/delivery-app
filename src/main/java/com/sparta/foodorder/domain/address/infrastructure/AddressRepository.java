@@ -22,5 +22,7 @@ public interface AddressRepository extends JpaRepository<Address, Long> {
     List<Address> findByUserIdOrderByCreatedAtDesc(Long userId);
     
     Optional<Address> findByUserIdAndIsDefaultTrue(Long userId);
+    
+    long countByUserIdAndIsDeletedFalse(Long userId);
 }
 

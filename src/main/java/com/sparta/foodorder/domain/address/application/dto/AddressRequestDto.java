@@ -3,6 +3,7 @@ package com.sparta.foodorder.domain.address.application.dto;
 import com.sparta.foodorder.domain.address.domain.Address;
 import com.sparta.foodorder.domain.user.domain.User;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,19 +18,22 @@ public class AddressRequestDto {
     private String addressName;
 
     @NotBlank(message = "주소는 필수입니다")
-    @Size(max = 255, message = "주소는 255자 이하여야 합니다")
+    @Size(min = 5, max = 255, message = "주소는 5자 이상 255자 이하여야 합니다")
     private String addressLine;
 
     @Size(max = 255, message = "상세 주소는 255자 이하여야 합니다")
     private String detailAddress;
 
-    @Size(max = 20, message = "우편번호는 20자 이하여야 합니다")
+    @NotBlank(message = "우편번호는 필수입니다")
+    @Pattern(regexp = "^\\d{5}$", message = "우편번호는 5자리 숫자여야 합니다")
     private String postalCode;
 
-    @Size(max = 50, message = "수령인 이름은 50자 이하여야 합니다")
+    @NotBlank(message = "수령인 이름은 필수입니다")
+    @Size(min = 2, max = 50, message = "수령인 이름은 2자 이상 50자 이하여야 합니다")
     private String recipientName;
 
-    @Size(max = 20, message = "수령인 전화번호는 20자 이하여야 합니다")
+    @NotBlank(message = "수령인 전화번호는 필수입니다")
+    @Pattern(regexp = "^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$", message = "올바른 전화번호 형식이 아닙니다")
     private String recipientPhone;
 
     private Boolean isDefault;

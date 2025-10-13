@@ -28,6 +28,12 @@ public class AddressServiceImpl implements AddressService {
     @Transactional
     public AddressResponseDto createAddress(Long userId, AddressRequestDto request) {
         User user = findUserById(userId);
+        
+        // 주소 개수 제한 체크 (최대 10개)
+        long addressCount = addressRepository.countByUserIdAndIsDeletedFalse(userId);
+        if (addressCount >= 10) {
+            throw new BusinessException(ErrorCode.ADDRESS_LIMIT_EXCEEDED);
+        }
 
         if (Boolean.TRUE.equals(request.getIsDefault())) {
             addressRepository.findByUserIdAndIsDefaultTrue(userId)
@@ -52,6 +58,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public AddressResponseDto getAddress(Long addressId, Long userId) {
         Address address = findAddressByIdAndUserId(addressId, userId);
+        validateAddressNotDeleted(address);
         return AddressResponseDto.from(address);
     }
 
@@ -59,6 +66,7 @@ public class AddressServiceImpl implements AddressService {
     @Transactional
     public AddressResponseDto updateAddress(Long addressId, Long userId, AddressRequestDto request) {
         Address address = findAddressByIdAndUserId(addressId, userId);
+        validateAddressNotDeleted(address);
 
         address.updateAddress(
                 request.getAddressLine(),
@@ -86,13 +94,20 @@ public class AddressServiceImpl implements AddressService {
     @Transactional
     public void deleteAddress(Long addressId, Long userId) {
         Address address = findAddressByIdAndUserId(addressId, userId);
-        addressRepository.delete(address);
+        validateAddressNotDeleted(address);
+        
+        if (Boolean.TRUE.equals(address.getIsDefault())) {
+            throw new BusinessException(ErrorCode.DEFAULT_ADDRESS_DELETE_NOT_ALLOWED);
+        }
+        
+        address.markAsDeleted();
     }
 
     @Override
     @Transactional
     public AddressResponseDto setDefaultAddress(Long addressId, Long userId) {
         Address address = findAddressByIdAndUserId(addressId, userId);
+        validateAddressNotDeleted(address);
 
         addressRepository.findByUserIdAndIsDefaultTrue(userId)
                 .ifPresent(Address::setAsNotDefault);
@@ -116,8 +131,20 @@ public class AddressServiceImpl implements AddressService {
     }
 
     private Address findAddressByIdAndUserId(Long addressId, Long userId) {
-        return addressRepository.findByIdAndUserId(addressId, userId)
+        Address address = addressRepository.findByIdAndUserId(addressId, userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ADDRESS_NOT_FOUND));
+        
+        if (!address.getUser().getId().equals(userId)) {
+            throw new BusinessException(ErrorCode.ADDRESS_PERMISSION_DENIED);
+        }
+        
+        return address;
+    }
+    
+    private void validateAddressNotDeleted(Address address) {
+        if (Boolean.TRUE.equals(address.getIsDeleted())) {
+            throw new BusinessException(ErrorCode.ADDRESS_DELETED);
+        }
     }
 }
 

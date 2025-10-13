@@ -78,4 +78,8 @@ public class Address extends BaseEntity {
     public void setAsNotDefault() {
         this.isDefault = false;
     }
+    
+    public void markAsDeleted() {
+        this.isDeleted = true;
+    }
 }
