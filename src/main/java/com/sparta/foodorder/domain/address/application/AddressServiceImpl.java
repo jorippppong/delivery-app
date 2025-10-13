@@ -69,6 +69,7 @@ public class AddressServiceImpl implements AddressService {
         validateAddressNotDeleted(address);
 
         address.updateAddress(
+                request.getAddressName(),
                 request.getAddressLine(),
                 request.getDetailAddress(),
                 request.getPostalCode()
