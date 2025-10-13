@@ -29,6 +29,9 @@ public enum ErrorCode {
     USER_BANNED(HttpStatus.FORBIDDEN, "U011", "제재된 사용자입니다"),
     USER_WITHDRAWN(HttpStatus.FORBIDDEN, "U012", "탈퇴 처리된 사용자입니다"),
     INVALID_USER_STATUS(HttpStatus.BAD_REQUEST, "U013", "잘못된 사용자 상태입니다"),
+    DUPLICATE_BUSINESS_NUMBER(HttpStatus.CONFLICT, "U014", "이미 등록된 사업자번호입니다"),
+    USER_PENDING_APPROVAL(HttpStatus.FORBIDDEN, "U016", "승인 대기 중인 사용자입니다"),
+    USER_NOT_PENDING(HttpStatus.BAD_REQUEST, "U017", "승인 대기 상태가 아닙니다"),
 
     // 상품 관련 에러
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "P001", "상품을 찾을 수 없습니다"),

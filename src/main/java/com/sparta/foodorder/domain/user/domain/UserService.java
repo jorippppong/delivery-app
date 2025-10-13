@@ -1,19 +1,33 @@
 package com.sparta.foodorder.domain.user.domain;
 
-import com.sparta.foodorder.domain.user.application.dto.SignupRequestDto;
-import com.sparta.foodorder.domain.user.application.dto.UpdatePasswordRequestDto;
-import com.sparta.foodorder.domain.user.application.dto.UpdateProfileRequestDto;
-import com.sparta.foodorder.domain.user.application.dto.UserResponseDto;
-import com.sparta.foodorder.domain.user.application.dto.UserStatusUpdateRequestDto;
+import com.sparta.foodorder.domain.user.application.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface UserService {
     
     /**
-     * 회원 가입
+     * 일반 회원 가입 (USER)
      */
     UserResponseDto signup(SignupRequestDto request);
+    
+    /**
+     * 오너 회원 가입 (OWNER)
+     * 사업자등록번호 검증 포함
+     */
+    UserResponseDto signupOwner(OwnerSignupRequestDto request);
+    
+    /**
+     * 매니저 회원 가입 (MANAGER)
+     * 승인 대기 상태로 생성
+     */
+    UserResponseDto signupManager(ManagerSignupRequestDto request);
+    
+    /**
+     * 마스터 회원 가입 (MASTER)
+     * 승인 대기 상태로 생성
+     */
+    UserResponseDto signupMaster(MasterSignupRequestDto request);
     
     /**
      * 사용자 조회 (이메일로)
@@ -71,5 +85,15 @@ public interface UserService {
      * 탈퇴한 사용자 목록 조회
      */
     Page<UserResponseDto> getWithdrawnUsers(Pageable pageable);
+    
+    /**
+     * 승인 대기 중인 사용자 목록 조회
+     */
+    Page<UserResponseDto> getPendingUsers(Pageable pageable);
+    
+    /**
+     * 사용자 승인/거부 (MASTER 전용)
+     */
+    UserResponseDto approveUser(Long userId, ApprovalRequestDto request);
 }
 

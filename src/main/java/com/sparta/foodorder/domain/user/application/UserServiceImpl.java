@@ -1,10 +1,6 @@
 package com.sparta.foodorder.domain.user.application;
 
-import com.sparta.foodorder.domain.user.application.dto.SignupRequestDto;
-import com.sparta.foodorder.domain.user.application.dto.UpdatePasswordRequestDto;
-import com.sparta.foodorder.domain.user.application.dto.UpdateProfileRequestDto;
-import com.sparta.foodorder.domain.user.application.dto.UserResponseDto;
-import com.sparta.foodorder.domain.user.application.dto.UserStatusUpdateRequestDto;
+import com.sparta.foodorder.domain.user.application.dto.*;
 import com.sparta.foodorder.domain.user.domain.User;
 import com.sparta.foodorder.domain.user.domain.UserService;
 import com.sparta.foodorder.domain.user.domain.UserStatus;
@@ -29,20 +25,77 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDto signup(SignupRequestDto request) {
-        // 이메일 중복 체크
         if (userRepository.findByUserEmail(request.getUserEmail()).isPresent()) {
             throw new BusinessException(ErrorCode.DUPLICATE_EMAIL);
         }
         
-        // 닉네임 중복 체크
         if (userRepository.findByNickName(request.getNickName()).isPresent()) {
             throw new BusinessException(ErrorCode.DUPLICATE_NICKNAME);
         }
 
-        // 비밀번호 암호화
         String encodedPassword = passwordEncoder.encode(request.getPassword());
 
-        // 사용자 생성
+        User user = request.toEntity(encodedPassword);
+        User savedUser = userRepository.save(user);
+
+        return UserResponseDto.from(savedUser);
+    }
+    
+    @Override
+    @Transactional
+    public UserResponseDto signupOwner(OwnerSignupRequestDto request) {
+        if (userRepository.findByUserEmail(request.getUserEmail()).isPresent()) {
+            throw new BusinessException(ErrorCode.DUPLICATE_EMAIL);
+        }
+        
+        if (userRepository.findByNickName(request.getNickName()).isPresent()) {
+            throw new BusinessException(ErrorCode.DUPLICATE_NICKNAME);
+        }
+        
+        if (userRepository.findByBusinessNumber(request.getBusinessNumber()).isPresent()) {
+            throw new BusinessException(ErrorCode.DUPLICATE_BUSINESS_NUMBER);
+        }
+
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+
+        User user = request.toEntity(encodedPassword);
+        User savedUser = userRepository.save(user);
+
+        return UserResponseDto.from(savedUser);
+    }
+    
+    @Override
+    @Transactional
+    public UserResponseDto signupManager(ManagerSignupRequestDto request) {
+        if (userRepository.findByUserEmail(request.getUserEmail()).isPresent()) {
+            throw new BusinessException(ErrorCode.DUPLICATE_EMAIL);
+        }
+        
+        if (userRepository.findByNickName(request.getNickName()).isPresent()) {
+            throw new BusinessException(ErrorCode.DUPLICATE_NICKNAME);
+        }
+
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+
+        User user = request.toEntity(encodedPassword);
+        User savedUser = userRepository.save(user);
+
+        return UserResponseDto.from(savedUser);
+    }
+    
+    @Override
+    @Transactional
+    public UserResponseDto signupMaster(MasterSignupRequestDto request) {
+        if (userRepository.findByUserEmail(request.getUserEmail()).isPresent()) {
+            throw new BusinessException(ErrorCode.DUPLICATE_EMAIL);
+        }
+        
+        if (userRepository.findByNickName(request.getNickName()).isPresent()) {
+            throw new BusinessException(ErrorCode.DUPLICATE_NICKNAME);
+        }
+
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+
         User user = request.toEntity(encodedPassword);
         User savedUser = userRepository.save(user);
 
@@ -62,7 +115,6 @@ public class UserServiceImpl implements UserService {
         User user = findUserByEmail(userEmail);
         validateUserAccess(user);
 
-        // 이메일 중복 체크 
         userRepository.findByUserEmail(request.getUserEmail())
                 .ifPresent(existingUser -> {
                     if (!existingUser.getUserEmail().equals(userEmail)) {
@@ -81,17 +133,14 @@ public class UserServiceImpl implements UserService {
         User user = findUserByEmail(userEmail);
         validateUserAccess(user);
 
-        // 현재 비밀번호 검증
         if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
             throw new BusinessException(ErrorCode.INVALID_PASSWORD);
         }
         
-        // 현재 비밀번호와 새 비밀번호 동일 여부 체크
         if (request.getCurrentPassword().equals(request.getNewPassword())) {
             throw new BusinessException(ErrorCode.SAME_PASSWORD);
         }
 
-        // 새 비밀번호 암호화
         String encodedNewPassword = passwordEncoder.encode(request.getNewPassword());
         user.changePassword(encodedNewPassword);
     }
@@ -102,7 +151,6 @@ public class UserServiceImpl implements UserService {
         User user = findUserByEmail(userEmail);
         validateUserAccess(user);
         
-        // 이미 탈퇴한 사용자인지 확인
         if (user.getStatus() == UserStatus.WITHDRAWN) {
             throw new BusinessException(ErrorCode.USER_WITHDRAWN);
         }
@@ -165,6 +213,30 @@ public class UserServiceImpl implements UserService {
                 .map(UserResponseDto::from);
     }
     
+    @Override
+    public Page<UserResponseDto> getPendingUsers(Pageable pageable) {
+        return userRepository.findByStatus(UserStatus.PENDING, pageable)
+                .map(UserResponseDto::from);
+    }
+    
+    @Override
+    @Transactional
+    public UserResponseDto approveUser(Long userId, ApprovalRequestDto request) {
+        User user = findUserById(userId);
+        
+        if (user.getStatus() != UserStatus.PENDING) {
+            throw new BusinessException(ErrorCode.USER_NOT_PENDING);
+        }
+        
+        if (request.getApproved()) {
+            user.approve();
+        } else {
+            user.reject();
+        }
+        
+        return UserResponseDto.from(user);
+    }
+    
     private void validateUserAccess(User user) {
         if (user.getStatus() == UserStatus.WITHDRAWN) {
             throw new BusinessException(ErrorCode.USER_WITHDRAWN);
@@ -172,6 +244,10 @@ public class UserServiceImpl implements UserService {
         
         if (user.getStatus() == UserStatus.BANNED) {
             throw new BusinessException(ErrorCode.USER_BANNED);
+        }
+        
+        if (user.getStatus() == UserStatus.PENDING) {
+            throw new BusinessException(ErrorCode.USER_PENDING_APPROVAL);
         }
         
         if (Boolean.TRUE.equals(user.getIsDeleted())) {
