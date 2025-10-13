@@ -153,4 +153,15 @@ public class MenuService {
             }
         }
     }
+
+    //메뉴가 주문 가능한 상태인지(활성화되어있는지 체크)
+    @Transactional(readOnly = true)
+    public Menu OrderableMenu(UUID menuId) {
+        Menu menu = menuRepository.findById(menuId).orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        if(!menu.isActive() || menu.isHidden() || menu.isDeleted()) {
+            throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+        return menu;
+    }
 }
