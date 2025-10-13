@@ -36,6 +36,16 @@ public enum ErrorCode {
     ADDRESS_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "A002", "해당 주소에 대한 권한이 없습니다"),
     DEFAULT_ADDRESS_EXISTS(HttpStatus.BAD_REQUEST, "A003", "이미 기본 배송지가 존재합니다"),
 
+    // 결제 관련 에러
+    PAYMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "PAY001", "결제를 찾을 수 없습니다"),
+    PAYMENT_ALREADY_EXISTS(HttpStatus.CONFLICT, "PAY002", "이미 결제가 존재하는 주문입니다"),
+    PAYMENT_NOT_REFUNDABLE(HttpStatus.BAD_REQUEST, "PAY003", "환불이 불가능한 결제 상태입니다"),
+    PAYMENT_ACCESS_DENIED(HttpStatus.FORBIDDEN, "PAY004", "결제에 대한 접근 권한이 없습니다"),
+    PAYMENT_REFUND_TIME_EXPIRED(HttpStatus.BAD_REQUEST, "PAY005", "환불 가능 시간이 초과되었습니다"),
+    PAYMENT_ALREADY_REFUNDED(HttpStatus.BAD_REQUEST, "PAY006", "이미 환불된 결제입니다"),
+    PAYMENT_USER_MISMATCH(HttpStatus.FORBIDDEN, "PAY007", "본인의 결제만 처리할 수 있습니다"),
+    PAYMENT_OWNER_MISMATCH(HttpStatus.FORBIDDEN, "PAY008", "본인 가게의 주문만 처리할 수 있습니다"),
+
     // AI 관련 에러
     AI_PROVIDER_NOT_FOUND(HttpStatus.BAD_REQUEST, "AI001", "지원하지 않는 AI Provider입니다"),
     AI_PROMPT_REQUIRED(HttpStatus.BAD_REQUEST, "AI002", "프롬프트는 필수입니다"),

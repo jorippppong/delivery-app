@@ -9,6 +9,9 @@ import com.sparta.foodorder.domain.order.presentation.dto.GetStoreOrdersResponse
 import com.sparta.foodorder.domain.order.presentation.dto.GetUserOrdersResponseDto;
 import com.sparta.foodorder.domain.store.domain.Store;
 import com.sparta.foodorder.domain.store.domain.StoreService;
+import com.sparta.foodorder.global.exception.BusinessException;
+import com.sparta.foodorder.global.exception.ErrorCode;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -30,13 +33,15 @@ public class OrderService {
 
     // TODO : 결제 이벤트 발행
     public void cancelOrder(UUID orderId, Long userId) {
-        Order order = orderRepository.findById(orderId);
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
         order.validateOrderWriter(userId);
         order.cancel();
     }
 
     public void acceptOrder(UUID orderId, Long userId) {
-        Order order = orderRepository.findById(orderId);
+        Order order = orderRepository.findById(orderId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
         Store store = storeService.findById(order.getStoreId());
         store.validateOwner(userId);
         order.accept();
