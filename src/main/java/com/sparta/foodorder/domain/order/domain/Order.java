@@ -54,8 +54,8 @@ public class Order extends BaseUpdateEntity {
         }
     }
 
+    // created, pending  -> canceled
     public void cancel() {
-        // created, pending  -> canceled
         if (orderStatus.equals(OrderStatus.CREATED)) {
             this.orderStatus = OrderStatus.CANCELED;
         } else if (orderStatus.equals(OrderStatus.PENDING)) {
@@ -65,10 +65,43 @@ public class Order extends BaseUpdateEntity {
         throw new BusinessException(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
     }
 
+    // pending -> accept
     public void accept() {
-        // pending -> accept
-        if (orderStatus.isAcceptable()) {
-            this.orderStatus = OrderStatus.ACCEPTED;
+        if (!orderStatus.isAcceptable()) {
+            throw new BusinessException(ErrorCode.ORDER_ACCEPT_NOT_ALLOWED);
         }
+        this.orderStatus = OrderStatus.ACCEPTED;
+    }
+
+    // pending -> reject
+    public void reject() {
+        if (!orderStatus.isRejectable()) {
+            throw new BusinessException(ErrorCode.ORDER_REJECT_NOT_ALLOWED);
+        }
+        this.orderStatus = OrderStatus.REJECTED;
+    }
+
+    // accept -> ready
+    public void ready() {
+        if (!orderStatus.isReadyable()) {
+            throw new BusinessException(ErrorCode.ORDER_READY_NOT_ALLOWED);
+        }
+        this.orderStatus = OrderStatus.READY;
+    }
+
+    // ready -> delivering
+    public void deliver() {
+        if (!orderStatus.isDeliverable()) {
+            throw new BusinessException(ErrorCode.ORDER_DELIVER_NOT_ALLOWED);
+        }
+        this.orderStatus = OrderStatus.DELIVERING;
+    }
+
+    // delivering -> complete
+    public void complete() {
+        if (!orderStatus.isCompletable()) {
+            throw new BusinessException(ErrorCode.ORDER_COMPLETE_NOT_ALLOWED);
+        }
+        this.orderStatus = OrderStatus.COMPLETE;
     }
 }
