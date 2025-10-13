@@ -14,7 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "가게", description ="가게 관련 API")
+@Tag(name = "가게", description = "가게 관련 API")
 @RestController
 @RequestMapping("/v1/stores")
 @RequiredArgsConstructor
@@ -41,21 +41,22 @@ public class StoreController {
         @Valid @RequestBody StoreUpdateRequestDto storeUpdateRequestDto,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long userId = userDetails.getUserId();
+        String email = userDetails.getUser().getUserEmail();
         UserRole role = userDetails.getUser().getRole();
-        StoreResponseDto store = storeService.updateStore(storeUpdateRequestDto, storeId, userId, role);
+        StoreResponseDto store = storeService.updateStore(storeUpdateRequestDto, storeId, email, role);
         return ResponseEntity.ok(store);
     }
 
-    @Operation(summary = "가게 삭제", description = "폐업한 가게를 삭제합니다.")
+    @Operation(summary = "가게 삭제", description = "가게를 삭제합니다.")
     @DeleteMapping("/{storeId}")
     public ResponseEntity<Void> deleteStore(
         @PathVariable UUID storeId,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        Long userId = userDetails.getUserId();
+        String username = userDetails.getUsername();
+        String email = userDetails.getUser().getUserEmail();
         UserRole role = userDetails.getUser().getRole();
-        storeService.deleteStore(storeId, userId, role);
+        storeService.deleteStore(storeId, username, email, role);
         return ResponseEntity.ok().build();
     }
 
