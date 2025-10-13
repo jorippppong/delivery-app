@@ -8,5 +8,7 @@ import java.util.UUID;
 
 public interface MenuJpaRepository extends JpaRepository<Menu, UUID> {
     List<Menu> findByStoreId(UUID storeId);
-
+    List<Menu> findByStoreIdAndDeletedAtIsNull(UUID storeId);
+    List<Menu> findByStoreIdAndActiveTrueAndHiddenFalse(UUID storeId);
+    List<Menu> findByStoreIdAndActiveTrueAndHiddenFalseAndDeletedAtIsNull(UUID storeId);
 }

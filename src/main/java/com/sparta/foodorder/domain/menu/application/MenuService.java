@@ -9,17 +9,14 @@ import com.sparta.foodorder.domain.store.domain.Store;
 import com.sparta.foodorder.domain.store.domain.StoreService;
 import com.sparta.foodorder.global.exception.BusinessException;
 import com.sparta.foodorder.global.exception.ErrorCode;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.transaction.annotation.Transactional;
 
+
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -47,6 +44,66 @@ public class MenuService {
         } else throw new BusinessException(ErrorCode.STORE_NOT_FOUND);
     }
 
+    @Transactional(readOnly = true)
+    public List<MenuResponseDto> getMenus(UUID storeId, CustomUserDetails user) {
+        Store store = storeService.findById(storeId);
+        List<Menu> menu;
+        List<MenuResponseDto> responseDto;
+
+        if(user.getUser().getRole().toString().equals("USER") || !store.getOwnerId().equals(user.getUserId())) {
+            menu = menuRepository.findByStoreIdAndActiveTrueAndHiddenFalseAndDeletedAtIsNull(storeId);
+
+        } else if(user.getUser().getRole().toString().equals("MANAGER")||user.getUser().getRole().toString().equals("MASTER")) { //USER이외의 권한일 경우 모든 메뉴 출력
+            menu = menuRepository.findByStoreId(storeId);
+
+        } else { //관리자, 매니저
+            menu = menuRepository.findByStoreIdAndDeletedAtIsNull(storeId);
+        }
+
+        if(menu.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return menu.stream().map(MenuResponseDto::from).toList();
+    }
 
 
+    @Transactional(readOnly = true)
+    public MenuResponseDto getMenuForUser(UUID storeId, UUID menuId, CustomUserDetails user) {
+
+        Menu menu = menuRepository.findById(menuId).orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+        Store store = storeService.findById(storeId);
+
+        //해당 가게의 메뉴가 맞는지 확인
+        if (menu.getStore().getId().equals(storeId)) {
+            //메뉴가 활성화 상태인지 확인
+            if (!menu.isActive() || menu.isHidden() || menu.isDeleted()) {
+                throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND);
+            }
+
+        } else throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND); //가게정보가 일치하지 않으면 예외처리
+        return MenuResponseDto.from(menu);
+    }
+
+
+    @Transactional(readOnly = true)
+    public MenuResponseDto getMenuForOwner(UUID storeId, UUID menuId, CustomUserDetails user) {
+
+        Menu menu = menuRepository.findById(menuId).orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+        Store store = storeService.findById(storeId);
+        log.info("가게 id : {}",storeId);
+        String userRole = user.getUser().getRole().toString();
+        //해당 가게의 메뉴가 맞는지 확인
+        if (!menu.getStore().getId().equals(storeId)) {
+            throw new BusinessException(ErrorCode.STORE_PERMISSION_DENIED);
+        }
+
+        if (store.getOwnerId().equals(user.getUserId()) || userRole.equals("ADMIN") || userRole.equals("MANAGER")) {
+            if(menu.isDeleted()) {
+                throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND);
+            } else return MenuResponseDto.from(menu);
+
+        } else throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND); //가게정보가 일치하지 않으면 예외처리
+
+    }
 }

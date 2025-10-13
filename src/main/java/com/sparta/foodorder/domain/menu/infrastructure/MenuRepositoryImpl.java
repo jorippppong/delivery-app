@@ -35,4 +35,14 @@ public class MenuRepositoryImpl implements MenuRepository {
     public void delete(Menu menu) {
         menuJpaRepository.delete(menu);
     }
+
+    @Override
+    public List<Menu> findByStoreIdAndActiveTrueAndHiddenFalseAndDeletedAtIsNull(UUID storeId) {
+        return menuJpaRepository.findByStoreIdAndActiveTrueAndHiddenFalseAndDeletedAtIsNull(storeId);
+    }
+
+    @Override
+    public List<Menu> findByStoreIdAndDeletedAtIsNull(UUID storeId) {
+        return menuJpaRepository.findByStoreIdAndDeletedAtIsNull(storeId);
+    }
 }
