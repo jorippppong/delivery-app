@@ -75,5 +75,14 @@ public class MenuController {
         return ResponseEntity.ok(responseDto);
     }
 
+    //TODO menu 삭제 (옵션과 옵션value도 같이 삭제) -> soft delete
+    @PreAuthorize("hasAnyRole('OWNER','MANAGER','ADMIN')")
+    @DeleteMapping("/{menuId}")
+    public ResponseEntity<Void>  deleteMenu(@PathVariable UUID storeId,
+                                            @PathVariable UUID menuId,
+                                            @AuthenticationPrincipal CustomUserDetails user) {
+        menuService.deleteMenu(storeId, menuId, user);
+        return ResponseEntity.ok().build();
+    }
 
 }

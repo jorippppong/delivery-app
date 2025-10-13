@@ -51,13 +51,13 @@ public class MenuService {
         Store store = storeService.findById(storeId);
         List<Menu> menu;
 
-        if(user.getUser().getRole().toString().equals("USER") || !store.getOwnerId().equals(user.getUserId())) {
-            menu = menuRepository.findByStoreIdAndActiveTrueAndHiddenFalseAndDeletedAtIsNull(storeId);
-
-        } else if(user.getUser().getRole().toString().equals("MANAGER")||user.getUser().getRole().toString().equals("MASTER")) { //USER이외의 권한일 경우 모든 메뉴 출력
+        if(user.getUser().getRole().toString().equals("MANAGER")||user.getUser().getRole().toString().equals("ADMIN")) {
             menu = menuRepository.findByStoreId(storeId);
 
-        } else { //관리자, 매니저
+        } else if(user.getUser().getRole().toString().equals("USER") || !store.getOwnerId().equals(user.getUserId())) {
+            menu = menuRepository.findByStoreIdAndActiveTrueAndHiddenFalseAndDeletedAtIsNull(storeId);
+
+        } else {
             menu = menuRepository.findByStoreIdAndDeletedAtIsNull(storeId);
         }
 
@@ -131,5 +131,26 @@ public class MenuService {
 
             return responseDto;
         } else throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND);
+    }
+
+    public void deleteMenu(UUID storeId, UUID menuId, CustomUserDetails user) {
+        //삭제할 메뉴 조회
+        Menu menu = menuRepository.findById(menuId).orElseThrow(() -> new BusinessException(ErrorCode.PRODUCT_NOT_FOUND));
+        String username = user.getUsername();
+
+        if(menu.isDeleted()) throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND); //이미 삭제된 상품입니다 errorCode 추가하자
+
+        if(menu.getStore().getId().equals(storeId)) { //해당 가게의 메뉴가 맞는지 확인
+        if(user.getUser().getRole().toString().equals("ADMIN") || user.getUser().getRole().toString().equals("MANAGER")) {
+                menu.deleteMenu(username);
+                menuRepository.save(menu);
+        } else {
+            //삭제 요청한 사용자가 가게 주인이 맞는지 검증
+            Store store = storeService.findById(storeId);
+            store.validateOwner(user.getUserId());
+             menu.deleteMenu(username);
+             menuRepository.save(menu);
+            }
+        }
     }
 }
