@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "p_order_menu_option")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -14,13 +16,13 @@ public class OrderMenuOption {
 
     // optionId, optionValueId id 고민
     @Column(name = "order_menu_id")
-    private Long orderMenuId;
+    private UUID orderMenuId;
 
     @Column(name = "option_id")
-    private Long optionId;
+    private UUID optionId;
 
     @Column(name = "option_value_id")
-    private Long optionValueId;
+    private UUID optionValueId;
 
     @Column(name = "option_name", nullable = false)
     private String optionName;

@@ -37,6 +37,9 @@ public enum ErrorCode {
     // 주문 관련 에러
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "O001", "주문을 찾을 수 없습니다"),
     INVALID_ORDER_STATUS(HttpStatus.BAD_REQUEST, "O002", "잘못된 주문 상태입니다"),
+    ORDER_CANT_ACCESS(HttpStatus.FORBIDDEN, "O003", "주문에 접근할 수 없습니다.(주문의 작성자, 가게의 주인만 접근 가능)"),
+    ORDER_CANCEL_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "O004", "created, pending 상태일 때만 주문 취소 가능합니다."),
+
 
     // 주소 관련 에러
     ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "A001", "주소를 찾을 수 없습니다"),
@@ -52,7 +55,15 @@ public enum ErrorCode {
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH002", "유효하지 않은 토큰입니다"),
     TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "AUTH003", "만료된 토큰입니다"),
     TOKEN_TAMPERED(HttpStatus.UNAUTHORIZED, "AUTH004", "변조된 토큰입니다"),
-    REFRESH_TOKEN_REUSED(HttpStatus.UNAUTHORIZED, "AUTH005", "재사용된 리프레시 토큰입니다");
+    REFRESH_TOKEN_REUSED(HttpStatus.UNAUTHORIZED, "AUTH005", "재사용된 리프레시 토큰입니다"),
+
+    // AI 관련 에러
+    AI_PROVIDER_NOT_FOUND(HttpStatus.BAD_REQUEST, "AI001", "지원하지 않는 AI Provider입니다"),
+    AI_PROMPT_REQUIRED(HttpStatus.BAD_REQUEST, "AI002", "프롬프트는 필수입니다"),
+    AI_MODEL_NOT_FOUND(HttpStatus.BAD_REQUEST, "AI004", "지원하지 않는 AI 모델입니다"),
+    AI_EMPTY_RESPONSE(HttpStatus.INTERNAL_SERVER_ERROR, "A201", "AI가 빈 응답을 반환했습니다"),
+    AI_RESPONSE_PARSE_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "A202", "AI 응답 파싱에 실패했습니다"),
+    AI_GEMINI_API_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "A301", "Gemini API 오류가 발생했습니다");
 
     private final HttpStatus status;
     private final String code;
