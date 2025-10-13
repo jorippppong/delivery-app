@@ -1,5 +1,6 @@
 package com.sparta.foodorder.domain.order.presentation.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -37,12 +38,14 @@ public record CreateOrderRequestDto(
 
     }
 
+    @JsonIgnore
     public List<UUID> getMenuIds() {
         return menus().stream()
                 .map(MenuInfo::menuId)
                 .collect(Collectors.toList());
     }
 
+    @JsonIgnore
     public Map<UUID, Integer> getMenuIdAndQuantity() {
         return menus.stream()
                 .collect(Collectors.toMap(
