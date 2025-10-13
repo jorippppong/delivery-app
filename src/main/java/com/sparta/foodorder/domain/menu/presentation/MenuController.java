@@ -6,6 +6,8 @@ import com.sparta.foodorder.domain.menu.application.MenuService;
 import com.sparta.foodorder.domain.menu.presentation.dto.MenuCreateRequestDto;
 import com.sparta.foodorder.domain.menu.presentation.dto.MenuResponseDto;
 import com.sparta.foodorder.domain.menu.presentation.dto.MenuUpdateRequestDto;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(name = "메뉴", description = "메뉴 API")
 @RequestMapping("/v1/stores/{storeId}/menus")
 @RestController
 @RequiredArgsConstructor
@@ -24,6 +27,7 @@ import java.util.UUID;
 public class MenuController {
     private final MenuService menuService;
 
+    @Operation(summary = "메뉴 생성", description = "새로운 메뉴를 생성합니다.")
     @PostMapping
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<MenuResponseDto> createMenu(@PathVariable UUID storeId, @RequestBody @Valid MenuCreateRequestDto requestDto,
@@ -37,6 +41,7 @@ public class MenuController {
 
     }
 
+    @Operation(summary = "전체 메뉴 조회", description = "해당 가게의 모든 메뉴를 조회합니다.")
     @GetMapping
     public ResponseEntity<List<MenuResponseDto>> getAllMenus(@PathVariable UUID storeId,
                                                              @AuthenticationPrincipal CustomUserDetails user) {
@@ -44,7 +49,7 @@ public class MenuController {
         return ResponseEntity.ok(menuList);
     }
 
-    //TODO 단일 메뉴 조회
+    @Operation(summary = "단일 메뉴 조회", description = "해당 가게의 특정 메뉴를 조회합니다.")
     @GetMapping("/{menuId}")
     public ResponseEntity<MenuResponseDto> getMenu(@PathVariable UUID storeId,
                                                    @PathVariable UUID menuId,
@@ -62,7 +67,7 @@ public class MenuController {
         }
     }
 
-
+    @Operation(summary = "메뉴 수정", description = "해당 가게의 특정 메뉴를 수정합니다.")
     @PreAuthorize("hasRole('OWNER')")
     @PutMapping("/{menuId}")
     public ResponseEntity<MenuResponseDto> updateMenu(@PathVariable UUID storeId,
@@ -75,7 +80,7 @@ public class MenuController {
         return ResponseEntity.ok(responseDto);
     }
 
-    //TODO menu 삭제 (옵션과 옵션value도 같이 삭제) -> soft delete
+    @Operation(summary = "메뉴 삭제", description = "해당 가게의 특정 메뉴를 삭제합니다.")
     @PreAuthorize("hasAnyRole('OWNER','MANAGER','ADMIN')")
     @DeleteMapping("/{menuId}")
     public ResponseEntity<Void>  deleteMenu(@PathVariable UUID storeId,
