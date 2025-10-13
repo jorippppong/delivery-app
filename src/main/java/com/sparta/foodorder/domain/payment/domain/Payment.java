@@ -12,7 +12,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -24,18 +23,18 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Payment extends BaseUpdateEntity {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private static final int REFUND_TIME_LIMIT_MINUTES = 5;
 
-	@Column(name = "payment_public_id", nullable = false, unique = true, updatable = false, columnDefinition = "BINARY(16)")
-	private UUID paymentPublicId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.UUID)
+	@Column(columnDefinition = "BINARY(16)", nullable = false)
+	private UUID id;
 
 	@Column(name = "user_id", nullable = false)
 	private Long userId;
 
-	@Column(name = "order_id", nullable = false, unique = true)
-	private Long orderId;
+	@Column(name = "order_id", nullable = false, unique = true, columnDefinition = "BINARY(16)")
+	private UUID orderId;
 
 	@Column(nullable = false)
 	private Integer amount;
@@ -63,7 +62,7 @@ public class Payment extends BaseUpdateEntity {
 	@Column(name = "refunded_at")
 	private LocalDateTime refundedAt;
 
-	private Payment(Long userId, Long orderId, Integer amount,
+	private Payment(Long userId, UUID orderId, Integer amount,
 		PaymentMethod paymentMethod, String pgTransactionId) {
 		this.userId = userId;
 		this.orderId = orderId;
@@ -73,17 +72,11 @@ public class Payment extends BaseUpdateEntity {
 		this.status = PaymentStatus.READY;
 	}
 
-	public static Payment createPayment(Long userId, Long orderId, Integer amount,
+	public static Payment createPayment(Long userId, UUID orderId, Integer amount,
 		PaymentMethod paymentMethod, String pgTransactionId) {
 		return new Payment(userId, orderId, amount, paymentMethod, pgTransactionId);
 	}
 
-	@PrePersist
-	public void generatePaymentPublicId() {
-		if (this.paymentPublicId == null) {
-			this.paymentPublicId = UUID.randomUUID();
-		}
-	}
 
 	public void completePayment() {
 		this.status = PaymentStatus.PAID;
@@ -96,12 +89,6 @@ public class Payment extends BaseUpdateEntity {
 		this.failedAt = LocalDateTime.now();
 	}
 
-	public void cancelPayment(String reason) {
-		this.status = PaymentStatus.CANCELLED;
-		this.failReason = reason;
-		this.failedAt = LocalDateTime.now();
-	}
-
 	public void refundPayment(String reason) {
 		this.status = PaymentStatus.REFUNDED;
 		this.failReason = reason;
@@ -110,5 +97,13 @@ public class Payment extends BaseUpdateEntity {
 
 	public boolean isRefundableOrCancellable() {
 		return this.status == PaymentStatus.PAID;
+	}
+
+	public boolean isRefundableWithinTimeLimit() {
+		if (this.paidAt == null) {
+			return false;
+		}
+		LocalDateTime fiveMinutesAfterPaid = this.paidAt.plusMinutes(REFUND_TIME_LIMIT_MINUTES);
+		return LocalDateTime.now().isBefore(fiveMinutesAfterPaid);
 	}
 }

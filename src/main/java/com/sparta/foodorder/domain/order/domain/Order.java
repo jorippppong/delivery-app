@@ -5,6 +5,7 @@ import com.sparta.foodorder.global.exception.BusinessException;
 import com.sparta.foodorder.global.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "p_order")
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order extends BaseUpdateEntity {
 

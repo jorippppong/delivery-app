@@ -28,4 +28,8 @@ public class StoreCategory extends BaseCreateEntity {
         this.store = store;
         this.category = category;
     }
+
+    public static StoreCategory createStoreCategory(Store store, Category category) {
+        return new StoreCategory(store, category);
+    }
 }
