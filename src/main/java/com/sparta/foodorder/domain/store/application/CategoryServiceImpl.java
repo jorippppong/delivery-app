@@ -6,9 +6,13 @@ import com.sparta.foodorder.domain.store.application.dto.CategoryUpdateRequestDt
 import com.sparta.foodorder.domain.store.domain.Category;
 import com.sparta.foodorder.domain.store.domain.CategoryRepository;
 import com.sparta.foodorder.domain.store.domain.CategoryService;
+import com.sparta.foodorder.domain.store.domain.Store;
+import com.sparta.foodorder.domain.store.domain.StoreCategory;
 import com.sparta.foodorder.domain.user.domain.UserRole;
 import com.sparta.foodorder.global.exception.BusinessException;
 import jakarta.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -52,6 +56,17 @@ public class CategoryServiceImpl implements CategoryService {
         category.updateCategory(requestDto.name());
 
         return CategoryResponseDto.from(category);
+    }
+
+    @Override
+    public List<CategoryResponseDto> getCategoryDtoList(Store store) {
+        List<Category> categoryList = store.getStoreCategories().stream()
+            .map(StoreCategory::getCategory).toList();
+        List<CategoryResponseDto> categoryResponseDtoList = new ArrayList<>();
+        for(Category category : categoryList) {
+            categoryResponseDtoList.add(CategoryResponseDto.from(category));
+        }
+        return categoryResponseDtoList;
     }
 
     private void validateCategoryPermission(UserRole role) {

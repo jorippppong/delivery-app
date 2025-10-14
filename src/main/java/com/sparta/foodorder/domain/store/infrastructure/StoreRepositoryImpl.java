@@ -3,6 +3,8 @@ package com.sparta.foodorder.domain.store.infrastructure;
 import com.sparta.foodorder.domain.store.domain.Store;
 import com.sparta.foodorder.domain.store.domain.StoreRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -40,7 +42,17 @@ public class StoreRepositoryImpl implements StoreRepository {
     }
 
     @Override
-    public boolean existsById(UUID id) {
-        return jpaRepository.existsById(id);
+    public boolean existsByIdAndIsActiveTrue(UUID id) {
+        return jpaRepository.existsByIdAndIsActiveTrue(id);
+    }
+
+    @Override
+    public Page<Store> findAllByIsActiveTrue(Pageable pageable) {
+        return jpaRepository.findAllByIsActiveTrue(pageable);
+    }
+
+    @Override
+    public Page<Store> findAllByNameContainingAndIsActiveTrue(String q, Pageable pageable) {
+        return jpaRepository.findAllByNameContainingAndIsActiveTrue(q, pageable);
     }
 }

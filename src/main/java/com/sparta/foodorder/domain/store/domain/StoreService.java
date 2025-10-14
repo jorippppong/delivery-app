@@ -1,12 +1,14 @@
 package com.sparta.foodorder.domain.store.domain;
 
 import com.sparta.foodorder.domain.store.application.dto.StoreCreateRequestDto;
+import com.sparta.foodorder.domain.store.application.dto.StoreDetailResponseDto;
 import com.sparta.foodorder.domain.store.application.dto.StoreResponseDto;
 import com.sparta.foodorder.domain.store.application.dto.StoreUpdateRequestDto;
 import com.sparta.foodorder.domain.user.domain.UserRole;
 
-import java.util.List;
+import com.sparta.foodorder.global.dto.PagedResponse;
 import java.util.UUID;
+import org.springframework.data.domain.Pageable;
 
 public interface StoreService {
 
@@ -14,9 +16,9 @@ public interface StoreService {
      * 가게 생성 메서드
      */
     StoreResponseDto createStore(
-            StoreCreateRequestDto storeCreateRequestDto,
-            Long userId,
-            UserRole role
+        StoreCreateRequestDto storeCreateRequestDto,
+        Long userId,
+        UserRole role
     );
 
     /**
@@ -38,19 +40,20 @@ public interface StoreService {
      * 가게목록 조회 메서드
      * 검색 키워드 있을 경우, 키워드 검색 결과 가게 목록 조회
      */
-    List<StoreResponseDto> getStores(String query);
+    PagedResponse<StoreResponseDto> getStores(String query, Pageable pageable);
 
     /**
      * 가게 상세조회 메서드
      */
-    StoreResponseDto getStore(UUID storeId);
+    StoreDetailResponseDto getStore(UUID storeId);
 
     /**
      * 카테고리별 가게 조회 메서드
      */
-    List<StoreResponseDto> getStoresByCategory(UUID categoryId);
+    PagedResponse<StoreResponseDto> getStoresByCategory(UUID categoryId, Pageable pageable);
 
     Store findByUUID(UUID storeId);
 
     void validateExistenceById(UUID storeId);
+
 }
