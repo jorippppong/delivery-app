@@ -2,6 +2,7 @@ package com.sparta.foodorder.domain.user.application.dto;
 
 import com.sparta.foodorder.domain.user.domain.User;
 import com.sparta.foodorder.domain.user.domain.UserRole;
+import com.sparta.foodorder.domain.user.domain.UserStatus;
 import com.sparta.foodorder.global.validation.ValidKoreanOrEnglishName;
 import com.sparta.foodorder.global.validation.ValidPassword;
 import jakarta.validation.constraints.Email;
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SignupRequestDto {
+public class OwnerSignupRequestDto {
 
     @NotBlank(message = "이름은 필수입니다")
     @Size(min = 2, max = 50, message = "이름은 2자 이상 50자 이하여야 합니다")
@@ -39,7 +40,9 @@ public class SignupRequestDto {
     @Pattern(regexp = "^01[0-9]-?[0-9]{3,4}-?[0-9]{4}$", message = "올바른 전화번호 형식이 아닙니다")
     private String userPhone;
 
-    private UserRole role = UserRole.USER;  // 기본값 설정
+    @NotBlank(message = "사업자번호는 필수입니다")
+    @Size(max = 20, message = "사업자번호는 20자 이하여야 합니다")
+    private String businessNumber;
 
     public User toEntity(String encodedPassword) {
         return User.builder()
@@ -48,7 +51,10 @@ public class SignupRequestDto {
                 .userEmail(userEmail)
                 .password(encodedPassword)
                 .userPhone(userPhone)
-                .role(role)
+                .role(UserRole.OWNER)
+                .status(UserStatus.ACTIVE)
+                .businessNumber(businessNumber)
                 .build();
     }
 }
+
