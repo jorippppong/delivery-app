@@ -35,7 +35,7 @@ public class User extends BaseEntity {
     private String userPhone;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private UserRole role = UserRole.USER;
 
     @Enumerated(EnumType.STRING)
@@ -45,8 +45,12 @@ public class User extends BaseEntity {
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted = false;
 
+    @Column(name = "business_number", length = 20, unique = true)
+    private String businessNumber;  // OWNER 전용 사업자번호
+
     @Builder
-    public User(String name, String nickName, String userEmail, String password, String userPhone, UserRole role, UserStatus status, Boolean isDeleted) {
+    public User(String name, String nickName, String userEmail, String password, String userPhone, 
+                UserRole role, UserStatus status, Boolean isDeleted, String businessNumber) {
         this.name = name;
         this.nickName = nickName;
         this.userEmail = userEmail;
@@ -55,6 +59,7 @@ public class User extends BaseEntity {
         this.role = role != null ? role : UserRole.USER;
         this.status = status != null ? status : UserStatus.ACTIVE;
         this.isDeleted = isDeleted != null ? isDeleted : false;
+        this.businessNumber = businessNumber;
     }
 
     public void updateProfile(String userEmail, String userPhone) {
@@ -76,6 +81,14 @@ public class User extends BaseEntity {
 
     public void ban() {
         this.status = UserStatus.BANNED;
+    }
+    
+    public void approve() {
+        this.status = UserStatus.ACTIVE;
+    }
+    
+    public void reject() {
+        this.status = UserStatus.INACTIVE;
     }
     
     public Set<UserRole> getRoles() {
