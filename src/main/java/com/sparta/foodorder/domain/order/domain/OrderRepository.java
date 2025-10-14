@@ -5,4 +5,6 @@ import java.util.UUID;
 
 public interface OrderRepository {
     Optional<Order> findById(UUID orderId);
+
+    UUID save(Order order);
 }

@@ -2,6 +2,7 @@ package com.sparta.foodorder.global.dto;
 
 import java.util.List;
 import lombok.Getter;
+import org.springframework.data.domain.Page;
 
 @Getter
 public class PagedResponse<T> {
@@ -20,5 +21,14 @@ public class PagedResponse<T> {
 
     public static <T> PagedResponse<T> success(List<T> data, int page, int size, boolean hasNext) {
         return new PagedResponse<>(data, page, size, hasNext);
+    }
+    
+    public static <T> PagedResponse<T> of(Page<T> page) {
+        return new PagedResponse<>(
+            page.getContent(),
+            page.getNumber(),
+            page.getSize(),
+            page.hasNext()
+        );
     }
 }

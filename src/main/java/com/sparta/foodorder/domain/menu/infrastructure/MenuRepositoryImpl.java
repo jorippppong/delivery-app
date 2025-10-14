@@ -45,4 +45,8 @@ public class MenuRepositoryImpl implements MenuRepository {
     public List<Menu> findByStoreIdAndDeletedAtIsNull(UUID storeId) {
         return menuJpaRepository.findByStoreIdAndDeletedAtIsNull(storeId);
     }
+    public List<Menu> findAllByIds(List<UUID> menuIds) {
+        return menuJpaRepository.findAllById(menuIds);
+    }
+
 }

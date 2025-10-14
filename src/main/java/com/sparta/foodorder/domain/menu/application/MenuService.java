@@ -11,6 +11,8 @@ import com.sparta.foodorder.domain.store.domain.StoreService;
 import com.sparta.foodorder.global.exception.BusinessException;
 import com.sparta.foodorder.global.exception.ErrorCode;
 import jakarta.validation.Valid;
+import com.sparta.foodorder.domain.menu.domain.Menu;
+import com.sparta.foodorder.domain.menu.domain.MenuRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -21,11 +23,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import java.util.List;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
 
 public class MenuService {
+    private final MenuRepository menuRepository;
 
     private final MenuRepository menuRepository;
     private final StoreService storeService;
@@ -163,5 +169,9 @@ public class MenuService {
             throw new BusinessException(ErrorCode.PRODUCT_NOT_FOUND);
         }
         return menu;
+    }
+  
+    public List<Menu> findAllByIds(List<UUID> menuIds) {
+        return menuRepository.findAllByIds(menuIds);
     }
 }

@@ -60,7 +60,8 @@ public class Address extends BaseEntity {
         this.isDeleted = isDeleted != null ? isDeleted : false;
     }
 
-    public void updateAddress(String addressLine, String detailAddress, String postalCode) {
+    public void updateAddress(String addressName, String addressLine, String detailAddress, String postalCode) {
+        this.addressName = addressName;
         this.addressLine = addressLine;
         this.detailAddress = detailAddress;
         this.postalCode = postalCode;
@@ -77,5 +78,9 @@ public class Address extends BaseEntity {
 
     public void setAsNotDefault() {
         this.isDefault = false;
+    }
+    
+    public void markAsDeleted() {
+        this.isDeleted = true;
     }
 }

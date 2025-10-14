@@ -18,7 +18,6 @@ public class OrderMenu extends BaseCreateEntity {
     @Column(name = "order_id", nullable = false)
     private UUID orderId;
 
-    // menu snapshot이 있는데, id까지 필요할까..? (nullable 여부 고민)
     @Column(name = "menu_id")
     private UUID menuId;
 
@@ -28,6 +27,10 @@ public class OrderMenu extends BaseCreateEntity {
     @Column(name = "menu_name", nullable = false)
     private String menuName;
 
-    @Column(name = "menu_price", nullable = false)
-    private int menuPrice;
+    @Column(name = "total_price", nullable = false)
+    private int totalPrice;
+
+    public OrderMenu(UUID orderId, UUID menuId, int quantity, String menuName, int totalPrice) {
+
+    }
 }
