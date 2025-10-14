@@ -19,5 +19,19 @@ services:
       timeout: 20s
       retries: 10
 
+  redis:
+    image: redis:latest
+    container_name: foodorder-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 10s
+      retries: 5
+
 volumes:
   mysql_data:
+  redis_data:

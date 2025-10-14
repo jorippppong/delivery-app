@@ -5,8 +5,8 @@ import com.sparta.foodorder.domain.store.application.dto.StoreResponseDto;
 import com.sparta.foodorder.domain.store.application.dto.StoreUpdateRequestDto;
 import com.sparta.foodorder.domain.user.domain.UserRole;
 
-import java.util.UUID;
 import java.util.List;
+import java.util.UUID;
 
 public interface StoreService {
 
@@ -14,9 +14,9 @@ public interface StoreService {
      * 가게 생성 메서드
      */
     StoreResponseDto createStore(
-        StoreCreateRequestDto storeCreateRequestDto,
-        Long userId,
-        UserRole role
+            StoreCreateRequestDto storeCreateRequestDto,
+            Long userId,
+            UserRole role
     );
 
     /**
@@ -25,14 +25,14 @@ public interface StoreService {
     StoreResponseDto updateStore(
         StoreUpdateRequestDto storeUpdateRequestDto,
         UUID storeId,
-        Long userId,
+        String email,
         UserRole role
     );
 
     /**
      * 가게 삭제 메서드
      */
-    void deleteStore(UUID storeId, Long userId, UserRole role);
+    void deleteStore(UUID storeId, String username, String email, UserRole role);
 
     /**
      * 가게목록 조회 메서드
@@ -50,5 +50,7 @@ public interface StoreService {
      */
     List<StoreResponseDto> getStoresByCategory(UUID categoryId);
 
-    Store findById(UUID storeId);
+    Store findByUUID(UUID storeId);
+
+    void validateExistenceById(UUID storeId);
 }

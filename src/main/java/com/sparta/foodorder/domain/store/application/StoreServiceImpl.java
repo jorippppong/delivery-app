@@ -3,20 +3,17 @@ package com.sparta.foodorder.domain.store.application;
 import com.sparta.foodorder.domain.store.application.dto.StoreCreateRequestDto;
 import com.sparta.foodorder.domain.store.application.dto.StoreResponseDto;
 import com.sparta.foodorder.domain.store.application.dto.StoreUpdateRequestDto;
-import com.sparta.foodorder.domain.store.domain.Category;
-import com.sparta.foodorder.domain.store.domain.CategoryRepository;
-import com.sparta.foodorder.domain.store.domain.Store;
-import com.sparta.foodorder.domain.store.domain.StoreRepository;
-import com.sparta.foodorder.domain.store.domain.StoreService;
+import com.sparta.foodorder.domain.store.domain.*;
 import com.sparta.foodorder.domain.user.domain.UserRole;
 import com.sparta.foodorder.global.exception.BusinessException;
 import com.sparta.foodorder.global.exception.ErrorCode;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -28,22 +25,18 @@ public class StoreServiceImpl implements StoreService {
     @Override
     @Transactional
     public StoreResponseDto createStore(
-        StoreCreateRequestDto requestDto,
-        Long userId,
-        UserRole role
+            StoreCreateRequestDto requestDto,
+            Long userId,
+            UserRole role
     ) {
-       if(role != UserRole.OWNER) {
-           throw new BusinessException(ErrorCode.STORE_PERMISSION_DENIED);
-       }
+        validateOwnerRole(role);
 
         if (storeRepository.existsByName(requestDto.name())) {
             throw new BusinessException(ErrorCode.STORE_ALREADY_EXIST);
         }
-
         if (storeRepository.existsByOwnerId(userId)) {
             throw new BusinessException(ErrorCode.OWNER_ALREADY_HAS_STORE);
         }
-
         if (storeRepository.existsByPhoneNumber(requestDto.phoneNumber())) {
             throw new BusinessException(ErrorCode.PHONE_ALREADY_EXIST);
         }
@@ -55,10 +48,10 @@ public class StoreServiceImpl implements StoreService {
         }
 
         Store store = Store.createStore(
-            userId, requestDto.name(), requestDto.description(), requestDto.address(),
-            requestDto.longitude(), requestDto.latitude(), requestDto.phoneNumber(),
-            requestDto.minOrderAmount(), requestDto.deliveryFee(),
-            requestDto.opensAt(), requestDto.closesAt()
+                userId, requestDto.name(), requestDto.description(), requestDto.address(),
+                requestDto.longitude(), requestDto.latitude(), requestDto.phoneNumber(),
+                requestDto.minOrderAmount(), requestDto.deliveryFee(),
+                requestDto.opensAt(), requestDto.closesAt()
         );
         categories.forEach(store::addCategory);
 
@@ -68,18 +61,43 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
+    @Transactional
     public StoreResponseDto updateStore(
-        StoreUpdateRequestDto storeUpdateRequestDto,
+        StoreUpdateRequestDto requestDto,
         UUID storeId,
-        Long userId,
+        String email,
         UserRole role
     ) {
-        return null;
+        validateOwnerRole(role);
+        Store store = getValidStore(storeId);
+        if (!store.getCreatedBy().equals(email)) {
+            throw new BusinessException(ErrorCode.STORE_PERMISSION_DENIED);
+        }
+
+        store.updateStore(requestDto.name(), requestDto.description(), requestDto.address(),
+            requestDto.longitude(), requestDto.latitude(), requestDto.phoneNumber(),
+            requestDto.isActive(), requestDto.minOrderAmount(), requestDto.deliveryFee(),
+            requestDto.opensAt(), requestDto.closesAt());
+
+        updateCategories(store, requestDto.categories());
+
+        return StoreResponseDto.from(store);
     }
 
     @Override
-    public void deleteStore(UUID storeId, Long userId, UserRole role) {
+    @Transactional
+    public void deleteStore(UUID storeId, String username, String email, UserRole role) {
+        validateOwnerRole(role);
 
+        Store store = storeRepository.findById(storeId)
+            .filter(s -> !s.isDeleted())
+            .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
+
+        if (!store.getCreatedBy().equals(username)) {
+            throw new BusinessException(ErrorCode.STORE_PERMISSION_DENIED);
+        }
+
+        store.softDelete(username);
     }
 
     @Override
@@ -98,8 +116,33 @@ public class StoreServiceImpl implements StoreService {
     }
 
     @Override
-    public Store findById(UUID storeId) {
+    public Store findByUUID(UUID storeId) {
         return storeRepository.findById(storeId)
+            .filter(s -> !s.isDeleted())
             .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
+    }
+
+    private void updateCategories(Store store, Set<UUID> categories) {
+        if (categories != null && !categories.isEmpty()) {
+            store.getStoreCategories().clear();
+            categories.forEach(categoryId -> {
+                Category category = categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
+
+                store.addCategory(category);
+            });
+        }
+    }
+
+    private Store getValidStore(UUID storeId) {
+        return storeRepository.findById(storeId)
+            .filter(s -> !s.isDeleted())
+            .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
+    }
+
+    private void validateOwnerRole(UserRole role) {
+        if (role != UserRole.OWNER) {
+            throw new BusinessException(ErrorCode.STORE_PERMISSION_DENIED);
+        }
     }
 }

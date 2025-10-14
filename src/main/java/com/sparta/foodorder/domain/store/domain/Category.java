@@ -30,4 +30,12 @@ public class Category extends BaseUpdateEntity {
     private Category(String name) {
         this.name = name;
     }
+
+    public static Category createCategory(String name) {
+        return new Category(name);
+    }
+
+    public void updateCategory(String name) {
+        this.name = name;
+    }
 }

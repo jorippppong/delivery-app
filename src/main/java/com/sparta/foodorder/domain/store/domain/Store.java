@@ -39,6 +39,7 @@ public class Store extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String name;
 
+    @Column(nullable = false)
     private String description;
 
     @Column(nullable = false)
@@ -118,5 +119,23 @@ public class Store extends BaseEntity {
 
     public void addCategory(Category category) {
         storeCategories.add(StoreCategory.createStoreCategory(this, category));
+    }
+
+    public void updateStore(
+        String name, String description, String address,
+        Double longitude, Double latitude, String phoneNumber,
+        Boolean isActive, Long minOrderAmount, Long deliveryFee,
+        LocalTime opensAt, LocalTime closesAt
+    ) {
+        if(name != null) this.name = name;
+        if(description != null) this.description = description;
+        if(address != null) this.address = address;
+        if(longitude != null && latitude != null) this.location = toPoint(longitude, latitude);
+        if(phoneNumber != null) this.phoneNumber = phoneNumber;
+        if(isActive != null) this.isActive = isActive;
+        if(minOrderAmount != null) this.minOrderAmount = minOrderAmount;
+        if(deliveryFee != null) this.deliveryFee = deliveryFee;
+        if(opensAt != null) this.opensAt = opensAt;
+        if(closesAt != null) this.closesAt = closesAt;
     }
 }

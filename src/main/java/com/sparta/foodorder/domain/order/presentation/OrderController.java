@@ -76,6 +76,17 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/orders/{orderId}/deliver")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<Void> deliverOrder(
+            @PathVariable("orderId") UUID orderId,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long userId = userDetails.getUserId();
+        orderService.deliverOrder(orderId, userId);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/orders/{orderId}/complete")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<Void> completeOrder(

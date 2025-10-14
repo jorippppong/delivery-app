@@ -4,18 +4,15 @@ import org.springframework.context.annotation.Configuration;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.sparta.foodorder.domain.auth.infrastructure.JwtAuthFilter;
 
-
-
-
-
-
 @Configuration
+@EnableMethodSecurity(prePostEnabled = true)
 @Slf4j
 @RequiredArgsConstructor
 public class SecurityConfig {
@@ -30,13 +27,16 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
                     "/v1/auth/**",
-                    "/v1/users/**",
+                    "/v1/users",  
+                    "/v1/users/owner",
+                    "/v1/users/manager", 
+                    "/v1/users/master",
                     "/swagger-ui/**", 
                     "/swagger-ui.html",
                     "/v3/api-docs/**",
                     "/swagger-resources/**",
                     "/webjars/**"
-                    ).permitAll()
+                ).permitAll()
                 .anyRequest().authenticated());
            
         return security.build();

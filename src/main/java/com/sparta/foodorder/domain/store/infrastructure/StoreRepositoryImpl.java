@@ -38,4 +38,9 @@ public class StoreRepositoryImpl implements StoreRepository {
     public Optional<Store> findById(UUID id) {
         return jpaRepository.findById(id);
     }
+
+    @Override
+    public boolean existsById(UUID id) {
+        return jpaRepository.existsById(id);
+    }
 }

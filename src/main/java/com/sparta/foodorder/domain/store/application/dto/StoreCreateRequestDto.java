@@ -9,6 +9,7 @@ public record StoreCreateRequestDto(
     @NotBlank(message = "가게명은 필수입니다.")
     String name,
 
+    @NotBlank(message = "가게설명은 필수입니다.")
     String description,
 
     @NotBlank(message = "주소는 필수입니다.")
@@ -21,7 +22,7 @@ public record StoreCreateRequestDto(
     Double latitude,
 
     @NotBlank(message = "전화번호는 필수입니다.")
-    @Pattern(regexp = "^[0-9]{3}-?[0-9]{3,4}-?[0-9]{4}$", message = "올바른 전화번호 형식이 아닙니다")
+    @Pattern(regexp = "^[0-9]{3}-[0-9]{3,4}-[0-9]{4}$", message = "올바른 전화번호 형식이 아닙니다")
     String phoneNumber,
 
     @NotNull(message = "최소주문금액은 필수입니다.")

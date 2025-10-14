@@ -22,4 +22,20 @@ public enum OrderStatus {
     public boolean isAcceptable() {
         return this == PENDING;
     }
+
+    public boolean isRejectable() {
+        return this == PENDING;
+    }
+
+    public boolean isReadyable() {
+        return this == ACCEPTED;
+    }
+
+    public boolean isDeliverable() {
+        return this == READY;
+    }
+
+    public boolean isCompletable() {
+        return this == DELIVERING;
+    }
 }

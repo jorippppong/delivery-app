@@ -12,5 +12,14 @@ public interface MenuRepository {
 
     Menu save(Menu menu);
 
+    void saveAndFlush(Menu menu);
+
     void delete(Menu menu);
+
+    //메뉴 전체 조회(일반 유저용)
+    List<Menu> findByStoreIdAndActiveTrueAndHiddenFalseAndDeletedAtIsNull(UUID storeId);
+    //메뉴 전체 조회(가게 주인용)
+    List<Menu> findByStoreIdAndDeletedAtIsNull(UUID storeId);
+    List<Menu> findAllByIds(List<UUID> menuIds);
+
 }
