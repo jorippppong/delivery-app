@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AiRequestDto {
+    private String productName;
+    private String content;
     private String prompt;
     private String model;
     private Integer maxTokens;
