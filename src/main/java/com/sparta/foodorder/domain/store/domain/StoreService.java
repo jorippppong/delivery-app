@@ -23,16 +23,16 @@ public interface StoreService {
      * 가게 수정 메서드
      */
     StoreResponseDto updateStore(
-            StoreUpdateRequestDto storeUpdateRequestDto,
-            UUID storeId,
-            Long userId,
-            UserRole role
+        StoreUpdateRequestDto storeUpdateRequestDto,
+        UUID storeId,
+        String email,
+        UserRole role
     );
 
     /**
      * 가게 삭제 메서드
      */
-    void deleteStore(UUID storeId, Long userId, UserRole role);
+    void deleteStore(UUID storeId, String username, String email, UserRole role);
 
     /**
      * 가게목록 조회 메서드
