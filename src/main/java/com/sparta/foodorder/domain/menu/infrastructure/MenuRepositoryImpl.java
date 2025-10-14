@@ -37,6 +37,14 @@ public class MenuRepositoryImpl implements MenuRepository {
     }
 
     @Override
+    public List<Menu> findByStoreIdAndActiveTrueAndHiddenFalseAndDeletedAtIsNull(UUID storeId) {
+        return menuJpaRepository.findByStoreIdAndActiveTrueAndHiddenFalseAndDeletedAtIsNull(storeId);
+    }
+
+    @Override
+    public List<Menu> findByStoreIdAndDeletedAtIsNull(UUID storeId) {
+        return menuJpaRepository.findByStoreIdAndDeletedAtIsNull(storeId);
+    }
     public List<Menu> findAllByIds(List<UUID> menuIds) {
         return menuJpaRepository.findAllById(menuIds);
     }

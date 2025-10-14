@@ -63,6 +63,15 @@ public class Menu extends BaseEntity {
     }
 
 
+    public void changeMenu (String name, String description, Integer price, boolean hidden, boolean active) {
+        if(name != null && ! name.isBlank()) this.name = name;
+        if(description != null) this.description = description;
+        if(price != null) this.price = price;
+        this.hidden = hidden;
+        this.active = active;
+    }
+
+
         public void deleteMenu (String username) {
             super.softDelete(username);
     }
