@@ -12,6 +12,8 @@ public interface MenuRepository {
 
     Menu save(Menu menu);
 
+    void saveAndFlush(Menu menu);
+
     void delete(Menu menu);
 
     //메뉴 전체 조회(일반 유저용)

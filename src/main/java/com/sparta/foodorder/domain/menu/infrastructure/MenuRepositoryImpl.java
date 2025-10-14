@@ -32,6 +32,12 @@ public class MenuRepositoryImpl implements MenuRepository {
     }
 
     @Override
+    public void saveAndFlush(Menu menu) {
+        menuJpaRepository.saveAndFlush(menu);
+
+    }
+
+    @Override
     public void delete(Menu menu) {
         menuJpaRepository.delete(menu);
     }
