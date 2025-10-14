@@ -138,4 +138,10 @@ public class Store extends BaseEntity {
         if(opensAt != null) this.opensAt = opensAt;
         if(closesAt != null) this.closesAt = closesAt;
     }
+
+    @Override
+    public void softDelete(String email) {
+        super.softDelete(email);
+        this.isActive = false;
+    }
 }

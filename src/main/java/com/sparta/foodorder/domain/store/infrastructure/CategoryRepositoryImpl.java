@@ -22,6 +22,11 @@ public class CategoryRepositoryImpl implements CategoryRepository {
     }
 
     @Override
+    public Boolean existsById(UUID categoryId) {
+        return jpaRepository.existsById(categoryId);
+    }
+
+    @Override
     public Boolean existsByName(String name) {
         return jpaRepository.existsByName(name);
     }

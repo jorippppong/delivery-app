@@ -31,11 +31,11 @@ public class MenuService {
     private final StoreService storeService;
 
     public MenuResponseDto insertMenu(MenuCreateRequestDto requestDto, UUID storeId, Long userId) {
-        log.info("로그인한 사용자 id : {}",userId);
+        log.info("로그인한 사용자 id : {}", userId);
         Store store = storeService.findByUUID(storeId);
 
         //가게가 delete상태가 아니고, active상태일 때만 메뉴생성 가능하도록
-        if(!store.isDeleted() && store.getIsActive()) {
+        if (!store.isDeleted() && store.getIsActive()) {
 
             store.validateOwner(userId); //요청한 사용자가 가게 주인이 맞는지 검증
 
@@ -43,7 +43,9 @@ public class MenuService {
             Menu savedMenu = menuRepository.save(menu);
             MenuResponseDto responseDto = MenuResponseDto.from(savedMenu);
             return responseDto;
-        } else throw new BusinessException(ErrorCode.STORE_NOT_FOUND);
+        } else {
+            throw new BusinessException(ErrorCode.STORE_NOT_FOUND);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -62,7 +64,7 @@ public class MenuService {
             menu = menuRepository.findByStoreIdAndDeletedAtIsNull(storeId);
         }
 
-        if(menu.isEmpty()) {
+        if (menu.isEmpty()) {
             return Collections.emptyList();
         }
 
@@ -109,7 +111,8 @@ public class MenuService {
 
     }
 
-    public MenuResponseDto updateMenu(UUID storeId, UUID menuId, @Valid MenuUpdateRequestDto requestDto, Long userId) {
+    public MenuResponseDto updateMenu(UUID storeId, UUID menuId,
+        @Valid MenuUpdateRequestDto requestDto, Long userId) {
         //가게 존재 및 소유자 검증
         Store store = storeService.findByUUID(storeId);
         store.validateOwner(userId);
@@ -119,13 +122,13 @@ public class MenuService {
         if(menu.isDeleted()) throw new BusinessException(ErrorCode.MENU_NOT_FOUND);
 
         //메뉴가 해당 가게 아래에 있는 메뉴가 맞는지
-        if(menu.getStore().getId().equals(storeId)) {
+        if (menu.getStore().getId().equals(storeId)) {
             menu.changeMenu(
-                    requestDto.getName(),
-                    requestDto.getDescription(),
-                    requestDto.getPrice(),
-                    requestDto.isHidden(),
-                    requestDto.isActive()
+                requestDto.getName(),
+                requestDto.getDescription(),
+                requestDto.getPrice(),
+                requestDto.isHidden(),
+                requestDto.isActive()
             );
             Menu savedMenu = menuRepository.save(menu);
             MenuResponseDto responseDto = MenuResponseDto.from(savedMenu);
@@ -166,7 +169,7 @@ public class MenuService {
         }
         return menu;
     }
-  
+
     public List<Menu> findAllByIds(List<UUID> menuIds) {
         return menuRepository.findAllByIds(menuIds);
     }
