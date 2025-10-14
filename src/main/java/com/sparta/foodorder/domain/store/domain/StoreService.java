@@ -34,7 +34,7 @@ public interface StoreService {
     /**
      * 가게 삭제 메서드
      */
-    void deleteStore(UUID storeId, String username, String email, UserRole role);
+    void deleteStore(UUID storeId, String email, UserRole role);
 
     /**
      * 가게목록 조회 메서드

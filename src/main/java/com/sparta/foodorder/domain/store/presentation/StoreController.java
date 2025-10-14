@@ -54,10 +54,9 @@ public class StoreController {
         @PathVariable UUID storeId,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        String username = userDetails.getUsername();
         String email = userDetails.getUserEmail();
         UserRole role = userDetails.getRole();
-        storeService.deleteStore(storeId, username, email, role);
+        storeService.deleteStore(storeId, email, role);
         return ResponseEntity.ok().build();
     }
 

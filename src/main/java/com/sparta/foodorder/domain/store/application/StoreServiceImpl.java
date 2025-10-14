@@ -103,18 +103,18 @@ public class StoreServiceImpl implements StoreService {
 
     @Override
     @Transactional
-    public void deleteStore(UUID storeId, String username, String email, UserRole role) {
+    public void deleteStore(UUID storeId, String email, UserRole role) {
         validateOwnerRole(role);
 
         Store store = storeRepository.findById(storeId)
             .filter(s -> !s.isDeleted())
             .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
 
-        if (!store.getCreatedBy().equals(username)) {
+        if (!store.getCreatedBy().equals(email)) {
             throw new BusinessException(ErrorCode.STORE_PERMISSION_DENIED);
         }
 
-        store.softDelete(username);
+        store.softDelete(email);
     }
 
     @Override

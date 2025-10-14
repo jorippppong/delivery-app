@@ -140,8 +140,8 @@ public class Store extends BaseEntity {
     }
 
     @Override
-    public void softDelete(String username) {
-        super.softDelete(username);
+    public void softDelete(String email) {
+        super.softDelete(email);
         this.isActive = false;
     }
 }
