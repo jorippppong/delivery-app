@@ -33,15 +33,20 @@ public enum ErrorCode {
     USER_PENDING_APPROVAL(HttpStatus.FORBIDDEN, "U016", "승인 대기 중인 사용자입니다"),
     USER_NOT_PENDING(HttpStatus.BAD_REQUEST, "U017", "승인 대기 상태가 아닙니다"),
 
-    // 상품 관련 에러
-    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "P001", "상품을 찾을 수 없습니다"),
-    OUT_OF_STOCK(HttpStatus.BAD_REQUEST, "P002", "재고가 부족합니다"),
+    // 메뉴 관련 에러
+    MENU_NOT_FOUND(HttpStatus.NOT_FOUND, "M001", "존재하지 않는 메뉴입니다."),
 
     // 주문 관련 에러
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "O001", "주문을 찾을 수 없습니다"),
     INVALID_ORDER_STATUS(HttpStatus.BAD_REQUEST, "O002", "잘못된 주문 상태입니다"),
     ORDER_CANT_ACCESS(HttpStatus.FORBIDDEN, "O003", "주문에 접근할 수 없습니다.(주문의 작성자, 가게의 주인만 접근 가능)"),
     ORDER_CANCEL_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "O004", "created, pending 상태일 때만 주문 취소 가능합니다."),
+    ORDER_ACCEPT_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "O005", "pending 상태일 때만 주문 취소 가능합니다."),
+    ORDER_REJECT_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "O006", "pending 상태일 때만 주문 취소 가능합니다."),
+    ORDER_READY_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "O007", "accept 상태일 때만 주문 취소 가능합니다."),
+    ORDER_DELIVER_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "O008", "ready 상태일 때만 주문 취소 가능합니다."),
+    ORDER_COMPLETE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "O009", "delivering 상태일 때만 주문 취소 가능합니다."),
+    ORDER_MEMO_LENGTH(HttpStatus.BAD_REQUEST, "O010", "주문의 메모는 200자 이하입니다."),
 
     // 주소 관련 에러
     ADDRESS_NOT_FOUND(HttpStatus.NOT_FOUND, "A001", "주소를 찾을 수 없습니다"),

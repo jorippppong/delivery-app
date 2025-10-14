@@ -13,4 +13,7 @@ public interface MenuRepository {
     Menu save(Menu menu);
 
     void delete(Menu menu);
+
+    List<Menu> findAllByIds(List<UUID> menuIds);
+
 }
