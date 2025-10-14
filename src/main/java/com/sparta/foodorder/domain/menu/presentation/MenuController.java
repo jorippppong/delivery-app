@@ -6,6 +6,7 @@ import com.sparta.foodorder.domain.menu.application.MenuService;
 import com.sparta.foodorder.domain.menu.presentation.dto.MenuCreateRequestDto;
 import com.sparta.foodorder.domain.menu.presentation.dto.MenuResponseDto;
 import com.sparta.foodorder.domain.menu.presentation.dto.MenuUpdateRequestDto;
+import com.sparta.foodorder.domain.user.domain.UserRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -54,8 +55,8 @@ public class MenuController {
     public ResponseEntity<MenuResponseDto> getMenu(@PathVariable UUID storeId,
                                                    @PathVariable UUID menuId,
                                                    @AuthenticationPrincipal CustomUserDetails user) {
-        String userRole = user.getUser().getRole().toString();
-        if(userRole.equals("USER")) {
+       UserRole userRole = user.getRole();
+        if(userRole == UserRole.USER) {
             log.info("메뉴 단일 조회 - 유저");
             MenuResponseDto responseDto = menuService.getMenuForUser(storeId, menuId, user);
             return ResponseEntity.ok(responseDto);

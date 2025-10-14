@@ -3,6 +3,7 @@ package com.sparta.foodorder.domain.menu.presentation.dto;
 import com.sparta.foodorder.domain.menu.domain.Menu;
 import lombok.Getter;
 
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -14,8 +15,9 @@ public class MenuResponseDto {
     private boolean hidden;
     private boolean active;
     private UUID storeId;
+    private final List<OptionResponseDto> options;
 
-    private MenuResponseDto(UUID id, String name, String description, Integer price, boolean hidden, boolean active, UUID storeId) {
+    private MenuResponseDto(UUID id, String name, String description, Integer price, boolean hidden, boolean active, UUID storeId, List<OptionResponseDto> options) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -23,6 +25,7 @@ public class MenuResponseDto {
         this.hidden = hidden;
         this.active = active;
         this.storeId = storeId;
+        this.options = options;
 
     }
 
@@ -34,7 +37,9 @@ public class MenuResponseDto {
                 menu.getPrice(),
                 menu.isHidden(),
                 menu.isActive(),
-                menu.getStore().getId()
+                menu.getStore().getId(),
+                OptionResponseDto.findAllOptions(menu.getOptions())
+
         );
     }
 }
