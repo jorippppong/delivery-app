@@ -1,11 +1,5 @@
 package com.sparta.foodorder.domain.payment.application;
 
-import java.util.UUID;
-
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import com.sparta.foodorder.domain.order.domain.Order;
 import com.sparta.foodorder.domain.order.domain.OrderRepository;
 import com.sparta.foodorder.domain.order.domain.OrderStatus;
@@ -21,6 +15,10 @@ import com.sparta.foodorder.domain.store.domain.StoreRepository;
 import com.sparta.foodorder.domain.user.domain.UserRole;
 import com.sparta.foodorder.global.exception.BusinessException;
 import com.sparta.foodorder.global.exception.ErrorCode;
+import java.util.UUID;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -129,7 +127,7 @@ public class PaymentServiceImpl implements PaymentService {
 
 	private void validatePermission(Payment payment, Order order, Long userId, UserRole role) {
 		switch (role) {
-			case MANAGER, ADMIN -> {}
+			case MANAGER, MASTER -> {}
 			case USER -> validateUserPermission(payment, userId);
 			case OWNER -> validateOwnerPermission(order, userId);
 			default -> throw new BusinessException(ErrorCode.PAYMENT_ACCESS_DENIED);
