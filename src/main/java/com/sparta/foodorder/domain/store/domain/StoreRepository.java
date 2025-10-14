@@ -2,6 +2,8 @@ package com.sparta.foodorder.domain.store.domain;
 
 import java.util.Optional;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface StoreRepository {
     boolean existsByName(String name);
@@ -14,5 +16,9 @@ public interface StoreRepository {
 
     Optional<Store> findById(UUID id);
 
-    boolean existsById(UUID id);
+    boolean existsByIdAndIsActiveTrue(UUID id);
+
+    Page<Store> findAllByIsActiveTrue(Pageable pageable);
+
+    Page<Store> findAllByNameContainingAndIsActiveTrue(String q, Pageable pageable);
 }

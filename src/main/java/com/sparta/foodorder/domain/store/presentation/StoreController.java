@@ -4,12 +4,13 @@ import com.sparta.foodorder.domain.auth.infrastructure.CustomUserDetails;
 import com.sparta.foodorder.domain.store.application.dto.*;
 import com.sparta.foodorder.domain.store.domain.StoreService;
 import com.sparta.foodorder.domain.user.domain.UserRole;
+import com.sparta.foodorder.global.dto.PagedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,7 @@ public class StoreController {
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long userId = userDetails.getUserId();
-        UserRole role = userDetails.getUser().getRole();
+        UserRole role = userDetails.getRole();
         StoreResponseDto storeResponseDto = storeService.createStore(storeCreateRequestDto, userId, role);
         return ResponseEntity.ok(storeResponseDto);
     }
@@ -41,8 +42,8 @@ public class StoreController {
         @Valid @RequestBody StoreUpdateRequestDto storeUpdateRequestDto,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        String email = userDetails.getUser().getUserEmail();
-        UserRole role = userDetails.getUser().getRole();
+        String email = userDetails.getUserEmail();
+        UserRole role = userDetails.getRole();
         StoreResponseDto store = storeService.updateStore(storeUpdateRequestDto, storeId, email, role);
         return ResponseEntity.ok(store);
     }
@@ -53,10 +54,9 @@ public class StoreController {
         @PathVariable UUID storeId,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        String username = userDetails.getUsername();
-        String email = userDetails.getUser().getUserEmail();
-        UserRole role = userDetails.getUser().getRole();
-        storeService.deleteStore(storeId, username, email, role);
+        String email = userDetails.getUserEmail();
+        UserRole role = userDetails.getRole();
+        storeService.deleteStore(storeId, email, role);
         return ResponseEntity.ok().build();
     }
 
@@ -65,17 +65,18 @@ public class StoreController {
         description = "가게 목록을 조회합니다. 파라미터가 있으면 해당 키워드로 검색된 가게 목록을 조회합니다."
     )
     @GetMapping
-    public ResponseEntity<List<StoreResponseDto>> getStores(
-        @RequestParam(name = "q", required = false) String query
+    public ResponseEntity<PagedResponse<StoreResponseDto>> getStores(
+        @RequestParam(name = "q", required = false) String query,
+        Pageable pageable
     ) {
-        List<StoreResponseDto> stores = storeService.getStores(query);
+        PagedResponse<StoreResponseDto> stores = storeService.getStores(query, pageable);
         return ResponseEntity.ok(stores);
     }
 
     @Operation(summary = "가게 상세조회", description = "특정 가게를 상세조회합니다.")
     @GetMapping("/{storeId}")
-    public ResponseEntity<StoreResponseDto> getStore(@PathVariable UUID storeId) {
-        StoreResponseDto store = storeService.getStore(storeId);
+    public ResponseEntity<StoreDetailResponseDto> getStore(@PathVariable UUID storeId) {
+        StoreDetailResponseDto store = storeService.getStore(storeId);
         return ResponseEntity.ok(store);
     }
 }

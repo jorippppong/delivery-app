@@ -8,12 +8,13 @@ import com.sparta.foodorder.domain.store.application.dto.StoreResponseDto;
 import com.sparta.foodorder.domain.store.domain.CategoryService;
 import com.sparta.foodorder.domain.store.domain.StoreService;
 import com.sparta.foodorder.domain.user.domain.UserRole;
+import com.sparta.foodorder.global.dto.PagedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,10 +36,11 @@ public class CategoryController {
 
     @Operation(summary = "카테고리별 가게 조회", description = "카테고리별 가게를 조회합니다.")
     @GetMapping("/{categoryId}/stores")
-    public ResponseEntity<List<StoreResponseDto>> getStoresByCategory(
-        @PathVariable UUID categoryId
+    public ResponseEntity<PagedResponse<StoreResponseDto>> getStoresByCategory(
+        @PathVariable UUID categoryId,
+        Pageable pageable
     ) {
-        List<StoreResponseDto> stores = storeService.getStoresByCategory(categoryId);
+        PagedResponse<StoreResponseDto> stores = storeService.getStoresByCategory(categoryId, pageable);
         return ResponseEntity.ok(stores);
     }
 
@@ -49,7 +51,7 @@ public class CategoryController {
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long userId = userDetails.getUserId();
-        UserRole role = userDetails.getUser().getRole();
+        UserRole role = userDetails.getRole();
         CategoryResponseDto response = categoryService.createCategory(requestDto, userId, role);
         return ResponseEntity.ok(response);
     }
@@ -62,7 +64,7 @@ public class CategoryController {
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long userId = userDetails.getUserId();
-        UserRole role = userDetails.getUser().getRole();
+        UserRole role = userDetails.getRole();
         CategoryResponseDto response =
             categoryService.updateCategory(categoryId, requestDto, userId, role);
         return ResponseEntity.ok(response);
