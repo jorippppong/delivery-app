@@ -3,6 +3,7 @@ package com.sparta.foodorder.domain.order.domain;
 import com.sparta.foodorder.global.common.BaseCreateEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.UUID;
@@ -11,6 +12,7 @@ import java.util.UUID;
 @Table(name = "p_order_menu")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class OrderMenu extends BaseCreateEntity {
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -31,6 +33,14 @@ public class OrderMenu extends BaseCreateEntity {
     private int totalPrice;
 
     public OrderMenu(UUID orderId, UUID menuId, int quantity, String menuName, int totalPrice) {
+        this.orderId = orderId;
+        this.menuId = menuId;
+        this.quantity = quantity;
+        this.menuName = menuName;
+        this.totalPrice = totalPrice;
+    }
 
+    public void updateTotalPrice(int totalPrice) {
+        this.totalPrice = totalPrice;
     }
 }

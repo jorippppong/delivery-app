@@ -124,4 +124,8 @@ public class Order extends BaseUpdateEntity {
             throw new BusinessException(ErrorCode.ORDER_MEMO_LENGTH);
         }
     }
+
+    public void updateTotalPrice(int totalPrice) {
+        this.totalPrice = totalPrice;
+    }
 }

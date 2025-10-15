@@ -1,7 +1,11 @@
 package com.sparta.foodorder.domain.order.application;
 
 import com.sparta.foodorder.domain.menu.application.MenuService;
+import com.sparta.foodorder.domain.menu.application.OptionService;
+import com.sparta.foodorder.domain.menu.application.OptionValueService;
 import com.sparta.foodorder.domain.menu.domain.Menu;
+import com.sparta.foodorder.domain.menu.domain.Option;
+import com.sparta.foodorder.domain.menu.domain.OptionValue;
 import com.sparta.foodorder.domain.order.domain.*;
 import com.sparta.foodorder.domain.order.presentation.dto.CreateOrderRequestDto;
 import com.sparta.foodorder.domain.order.presentation.dto.GetOrderResponseDto;
@@ -9,15 +13,15 @@ import com.sparta.foodorder.domain.order.presentation.dto.GetStoreOrdersResponse
 import com.sparta.foodorder.domain.order.presentation.dto.GetUserOrdersResponseDto;
 import com.sparta.foodorder.domain.store.domain.Store;
 import com.sparta.foodorder.domain.store.domain.StoreService;
+import com.sparta.foodorder.domain.user.domain.User;
+import com.sparta.foodorder.domain.user.domain.UserService;
+import com.sparta.foodorder.global.dto.PagedResponse;
 import com.sparta.foodorder.global.exception.BusinessException;
 import com.sparta.foodorder.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,53 +29,74 @@ import java.util.stream.Collectors;
 public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderMenuRepository orderMenuRepository;
+
     private final StoreService storeService;
     private final MenuService menuService;
+    private final UserService userService;
+    private final OptionService optionService;
+    private final OptionValueService optionValueService;
 
     private Order getOrder(UUID orderId) {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
     }
 
-    // option, option value는 상황 보고 추가
     public UUID createOrder(CreateOrderRequestDto dto, Long userId) {
         storeService.validateExistenceById(dto.storeId());
-        // 메뉴 옵션 존재하는지 확인
-        // 메뉴 옵션 value 존재하는지 확인
-
         List<Menu> menus = menuService.findAllByIds(dto.getMenuIds());
         Map<UUID, Menu> menuMap = menus.stream()
                 .collect(Collectors.toMap(Menu::getId, m -> m));
 
-        int totalPrice = calculateTotalPrice(dto.getMenuIdAndQuantity(), menuMap);
-
-        Order order = new Order(userId, dto.storeId(), dto.addressLine(), dto.detailAddress(), totalPrice, dto.memo());
+        // order 생성
+        Order order = new Order(userId, dto.storeId(), dto.addressLine(), dto.detailAddress(), 0, dto.memo());
         UUID orderId = orderRepository.save(order);
 
+        // orderMenu 생성
         List<OrderMenu> orderMenus = new ArrayList<>();
+        List<OrderMenuOption> orderMenuOptions = new ArrayList<>();
+        List<OrderMenuOptionValue> orderMenuOptionValues = new ArrayList<>();
+        int totalPrice = 0;
+
         for (CreateOrderRequestDto.MenuInfo menuInfo : dto.menus()) {
             Menu menu = menuMap.get(menuInfo.menuId());
-            OrderMenu orderMenu = new OrderMenu(orderId, menu.getId(), menuInfo.quantity(), menu.getName(), menuInfo.quantity() * menu.getPrice());
+
+            int menuTotalPrice = menu.getPrice() * menuInfo.quantity();
+            OrderMenu orderMenu = new OrderMenu(orderId, menu.getId(), menuInfo.quantity(), menu.getName(), 0);
             orderMenus.add(orderMenu);
+
+            // 옵션 처리
+            for (CreateOrderRequestDto.OptionInfo optionInfo : menuInfo.options()) {
+                Option option = optionService.findById(optionInfo.optionId());
+                OrderMenuOption orderMenuOption = new OrderMenuOption(orderMenu.getId(), option.getName(), 0);
+
+                int optionTotalPrice = 0;
+                for (UUID valueId : optionInfo.optionValueIds()) {
+                    OptionValue value = optionValueService.findById(valueId);
+                    OrderMenuOptionValue orderMenuOptionValue = new OrderMenuOptionValue(
+                            orderMenuOption.getId(),
+                            value.getValue(),
+                            value.getAddPrice()
+                    );
+                    orderMenuOptionValues.add(orderMenuOptionValue);
+                    optionTotalPrice += value.getAddPrice();
+                }
+
+                orderMenuOption.setPrice(optionTotalPrice);
+                orderMenuOptions.add(orderMenuOption);
+                menuTotalPrice += optionTotalPrice;
+            }
+
+            orderMenu.updateTotalPrice(menuTotalPrice);
+            totalPrice += menuTotalPrice;
         }
-        orderMenuRepository.saveAll(orderMenus);
-        // 주문 value 연관관계 추가
+
+        orderMenuRepository.saveAllOrderMenu(orderMenus);
+        orderMenuRepository.saveAllOrderMenuOption(orderMenuOptions);
+        orderMenuRepository.saveAllOrderMenuOptionValue(orderMenuOptionValues);
+
+        order.updateTotalPrice(totalPrice);
 
         return orderId;
-    }
-
-    private int calculateTotalPrice(Map<UUID, Integer> menuMap, Map<UUID, Menu> menuEntityMap) {
-        int totalPrice = 0;
-        for (Map.Entry<UUID, Integer> entry : menuMap.entrySet()) {
-            UUID menuId = entry.getKey();
-            int quantity = entry.getValue();
-            Menu menu = menuEntityMap.get(menuId);
-            if (menu == null) {
-                throw new BusinessException(ErrorCode.MENU_NOT_FOUND);
-            }
-            totalPrice += quantity * menu.getPrice();
-        }
-        return totalPrice;
     }
 
     // 결제 끝나고 주문 상태 변경 (created -> pending) : 이벤트 발행하여 처리할 예정
@@ -116,16 +141,52 @@ public class OrderService {
         order.complete();
     }
 
-    public List<GetUserOrdersResponseDto> getUserOrders(Long userId, int page, int size) {
-        return null;
+    public PagedResponse<GetUserOrdersResponseDto> getUserOrders(Long userId, int page, int size) {
+        List<OrderDetailQuery> orders = orderRepository.getUserOrders(userId, page - 1, size);
+        Set<UUID> storeIds = orders.stream()
+                .map(OrderDetailQuery::getStoreId)
+                .collect(Collectors.toSet());
+        List<Store> stores = storeService.findAllByIds(storeIds);
+        Map<UUID, Store> storeMap = stores.stream()
+                .collect(Collectors.toMap(Store::getId, s -> s));
 
+        List<GetUserOrdersResponseDto> dtos = orders.stream()
+                .map(order -> {
+                    Store store = storeMap.get(order.getStoreId());
+                    return GetUserOrdersResponseDto.from(order, store);
+                })
+                .toList();
+        boolean hasNext = dtos.size() > size;
+        List<GetUserOrdersResponseDto> pageContent = hasNext ? dtos.subList(0, size) : dtos;
+        return PagedResponse.success(pageContent, page, pageContent.size(), hasNext);
     }
 
-    public List<GetStoreOrdersResponseDto> getStoreOrders(UUID storeId, Long userId, int page, int size, OrderStatus status) {
-        return null;
+    public PagedResponse<GetStoreOrdersResponseDto> getStoreOrders(UUID storeId, Long userId, int page, int size) {
+        Store store = storeService.findByUUID(storeId);
+        store.validateOwner(userId);
+        List<OrderDetailQuery> orders = orderRepository.getStoreOrders(storeId, page - 1, size);
+        Set<Long> userIds = orders.stream()
+                .map(OrderDetailQuery::getUserId)
+                .collect(Collectors.toSet());
+        List<User> users = userService.findAllByIdIn(userIds);
+        Map<Long, User> userMap = users.stream()
+                .collect(Collectors.toMap(User::getId, u -> u));
+
+        List<GetStoreOrdersResponseDto> dtos = orders.stream()
+                .map(order -> {
+                    User user = userMap.get(order.getUserId());
+                    return GetStoreOrdersResponseDto.from(order, user);
+                })
+                .toList();
+        boolean hasNext = dtos.size() > size;
+        List<GetStoreOrdersResponseDto> pageContent = hasNext ? dtos.subList(0, size) : dtos;
+        return PagedResponse.success(pageContent, page, pageContent.size(), hasNext);
     }
 
-    public GetOrderResponseDto getOrder(UUID orderId, Long userId) {
-        return null;
+    public GetOrderResponseDto getOrder(UUID orderId, Long userId, String nickname) {
+        Order order = getOrder(orderId);
+        order.validateOrderWriter(userId);
+        OrderDetailQuery orderDetail = orderRepository.getOrderDetail(orderId);
+        return GetOrderResponseDto.from(order, orderDetail, nickname);
     }
 }

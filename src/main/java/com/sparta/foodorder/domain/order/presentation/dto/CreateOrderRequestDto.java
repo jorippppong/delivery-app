@@ -31,7 +31,7 @@ public record CreateOrderRequestDto(
 
     }
 
-    private record OptionInfo(
+    public record OptionInfo(
             UUID optionId,
             List<UUID> optionValueIds
     ) {

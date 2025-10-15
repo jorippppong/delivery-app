@@ -5,7 +5,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 public interface StoreJpaRepository extends JpaRepository<Store, UUID> {
@@ -37,4 +39,7 @@ public interface StoreJpaRepository extends JpaRepository<Store, UUID> {
 
     Optional<Store> findByOwnerId(Long ownerId);
 
+    Page<Store> findAllByNameContainingAndIsActiveTrue(String q, Pageable pageable);
+
+    List<Store> findAllByIdIn(Set<UUID> storeIds);
 }

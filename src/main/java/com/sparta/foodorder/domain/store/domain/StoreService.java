@@ -5,10 +5,12 @@ import com.sparta.foodorder.domain.store.application.dto.StoreDetailResponseDto;
 import com.sparta.foodorder.domain.store.application.dto.StoreResponseDto;
 import com.sparta.foodorder.domain.store.application.dto.StoreUpdateRequestDto;
 import com.sparta.foodorder.domain.user.domain.UserRole;
-
 import com.sparta.foodorder.global.dto.PagedResponse;
-import java.util.UUID;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 public interface StoreService {
 
@@ -16,19 +18,19 @@ public interface StoreService {
      * 가게 생성 메서드
      */
     StoreResponseDto createStore(
-        StoreCreateRequestDto storeCreateRequestDto,
-        Long userId,
-        UserRole role
+            StoreCreateRequestDto storeCreateRequestDto,
+            Long userId,
+            UserRole role
     );
 
     /**
      * 가게 수정 메서드
      */
     StoreResponseDto updateStore(
-        StoreUpdateRequestDto storeUpdateRequestDto,
-        UUID storeId,
-        String email,
-        UserRole role
+            StoreUpdateRequestDto storeUpdateRequestDto,
+            UUID storeId,
+            String email,
+            UserRole role
     );
 
     /**
@@ -57,4 +59,6 @@ public interface StoreService {
     void validateExistenceById(UUID storeId);
 
     Store updateRating(UUID storeId);
+
+    List<Store> findAllByIds(Set<UUID> storeIds);
 }

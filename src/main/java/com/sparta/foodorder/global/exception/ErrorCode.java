@@ -35,6 +35,8 @@ public enum ErrorCode {
 
     // 메뉴 관련 에러
     MENU_NOT_FOUND(HttpStatus.NOT_FOUND, "M001", "존재하지 않는 메뉴입니다."),
+    MENU_OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "M002", "존재하지 않는 옵션입니다."),
+    MENU_OPTION_VALUE_NOT_FOUND(HttpStatus.NOT_FOUND, "M003", "존재하지 않는 옵션 value 값입니다."),
 
     // 온셥 관련 에러
     OPTION_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "MO001", "해당 옵션에 대한 접근권한이 없습니다."),
@@ -61,7 +63,7 @@ public enum ErrorCode {
     ADDRESS_DELETED(HttpStatus.GONE, "A005", "삭제된 주소입니다"),
     ADDRESS_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "A006", "주소는 최대 10개까지 등록할 수 있습니다"),
     DEFAULT_ADDRESS_DELETE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "A007", "기본 배송지는 삭제할 수 없습니다"),
-    
+
     // 인증 관련 에러
     TOO_MANY_LOGIN_ATTEMPTS(HttpStatus.TOO_MANY_REQUESTS, "AUTH001", "로그인 시도 횟수를 초과했습니다"),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH002", "유효하지 않은 토큰입니다"),

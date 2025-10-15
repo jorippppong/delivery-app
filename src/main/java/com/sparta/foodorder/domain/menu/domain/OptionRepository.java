@@ -1,11 +1,12 @@
 package com.sparta.foodorder.domain.menu.domain;
 
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
+@Repository
 public interface OptionRepository {
 
     Option findByMenuId(UUID menuId);
@@ -20,7 +21,6 @@ public interface OptionRepository {
 
     boolean existsByIdAndMenuIdAndDeletedAtIsNull(UUID optionId, UUID menuId);
 
-  
     List<Option> findAllByMenuIdAndDeletedAtIsNull(UUID menuId);
-
+    
 }
