@@ -20,7 +20,7 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping("/orders")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'MASTER', 'MANAGER')")
     public ResponseEntity<CreateOrderResponseDto> createOrder(
             @RequestBody @Valid CreateOrderRequestDto dto,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -31,7 +31,7 @@ public class OrderController {
     }
 
     @PostMapping("/orders/{orderId}/cancel")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'MASTER', 'MANAGER')")
     public ResponseEntity<Void> cancelOrder(
             @PathVariable("orderId") UUID orderId,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -42,7 +42,7 @@ public class OrderController {
     }
 
     @PostMapping("/orders/{orderId}/accept")
-    @PreAuthorize("hasRole('OWNER')")
+    @PreAuthorize("hasAnyRole('OWNER', 'MASTER', 'MANAGER')")
     public ResponseEntity<Void> acceptOrder(
             @PathVariable("orderId") UUID orderId,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -53,7 +53,7 @@ public class OrderController {
     }
 
     @PostMapping("/orders/{orderId}/reject")
-    @PreAuthorize("hasRole('OWNER')")
+    @PreAuthorize("hasAnyRole('OWNER', 'MASTER', 'MANAGER')")
     public ResponseEntity<Void> rejectOrder(
             @PathVariable("orderId") UUID orderId,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -64,7 +64,7 @@ public class OrderController {
     }
 
     @PostMapping("/orders/{orderId}/ready")
-    @PreAuthorize("hasRole('OWNER')")
+    @PreAuthorize("hasAnyRole('OWNER', 'MASTER', 'MANAGER')")
     public ResponseEntity<Void> readyOrder(
             @PathVariable("orderId") UUID orderId,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -75,7 +75,7 @@ public class OrderController {
     }
 
     @PostMapping("/orders/{orderId}/deliver")
-    @PreAuthorize("hasRole('OWNER')")
+    @PreAuthorize("hasAnyRole('OWNER', 'MASTER', 'MANAGER')")
     public ResponseEntity<Void> deliverOrder(
             @PathVariable("orderId") UUID orderId,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -86,7 +86,7 @@ public class OrderController {
     }
 
     @PostMapping("/orders/{orderId}/complete")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'MASTER', 'MANAGER')")
     public ResponseEntity<Void> completeOrder(
             @PathVariable("orderId") UUID orderId,
             @AuthenticationPrincipal CustomUserDetails userDetails
@@ -97,7 +97,7 @@ public class OrderController {
     }
 
     @GetMapping("/users/orders")
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('USER', 'MASTER', 'MANAGER')")
     public ResponseEntity<PagedResponse<GetUserOrdersResponseDto>> getUserOrders(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
@@ -109,7 +109,7 @@ public class OrderController {
     }
 
     @GetMapping("/stores/{storeId}/orders")
-    @PreAuthorize("hasRole('OWNER')")
+    @PreAuthorize("hasAnyRole('OWNER', 'MASTER', 'MANAGER')")
     public ResponseEntity<PagedResponse<GetStoreOrdersResponseDto>> getStoreOrders(
             @PathVariable("storeId") UUID storeId,
             @RequestParam(value = "page", defaultValue = "1") int page,
@@ -122,6 +122,7 @@ public class OrderController {
     }
 
     @GetMapping("/orders/{orderId}")
+    @PreAuthorize("hasAnyRole('USER', 'OWNER', 'MASTER', 'MANAGER')")
     public ResponseEntity<GetOrderResponseDto> getOrder(
             @PathVariable("orderId") UUID orderId,
             @AuthenticationPrincipal CustomUserDetails userDetails
