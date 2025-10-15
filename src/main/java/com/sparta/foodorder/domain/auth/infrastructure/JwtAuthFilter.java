@@ -35,7 +35,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         if (!requestURI.startsWith("/v1/") || 
             (requestURI.startsWith("/v1/auth/") && !requestURI.equals("/v1/auth/me")) ||  
             requestURI.startsWith("/v1/auth/login") ||  
-            requestURI.startsWith("/v1/auth/logout") ||  
+            requestURI.startsWith("/v1/auth/logout") ||
+            (requestURI.equals("/v1/users") && request.getMethod().equals("POST")) ||
             requestURI.startsWith("/v1/users/userreg") ||  
             requestURI.startsWith("/v1/users/check-") ||  
             requestURI.contains("/v1/signup") ||  
