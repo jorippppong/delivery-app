@@ -70,13 +70,10 @@ public class Order extends BaseUpdateEntity {
 
     // created, pending  -> canceled
     public void cancel() {
-        if (orderStatus.equals(OrderStatus.CREATED)) {
-            this.orderStatus = OrderStatus.CANCELED;
-        } else if (orderStatus.equals(OrderStatus.PENDING)) {
-            // TODO : 이벤트 전송
-            this.orderStatus = OrderStatus.CANCELED;
+        if (!orderStatus.isCancelable()) {
+            throw new BusinessException(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
         }
-        throw new BusinessException(ErrorCode.ORDER_CANCEL_NOT_ALLOWED);
+        this.orderStatus = OrderStatus.CANCELED;
     }
 
     // pending -> accept

@@ -11,6 +11,9 @@ import com.sparta.foodorder.domain.order.presentation.dto.CreateOrderRequestDto;
 import com.sparta.foodorder.domain.order.presentation.dto.GetOrderResponseDto;
 import com.sparta.foodorder.domain.order.presentation.dto.GetStoreOrdersResponseDto;
 import com.sparta.foodorder.domain.order.presentation.dto.GetUserOrdersResponseDto;
+import com.sparta.foodorder.domain.payment.domain.Payment;
+import com.sparta.foodorder.domain.payment.domain.PaymentService;
+import com.sparta.foodorder.domain.payment.event.PaymentEvent;
 import com.sparta.foodorder.domain.store.domain.Store;
 import com.sparta.foodorder.domain.store.domain.StoreService;
 import com.sparta.foodorder.domain.user.domain.User;
@@ -19,6 +22,8 @@ import com.sparta.foodorder.global.dto.PagedResponse;
 import com.sparta.foodorder.global.exception.BusinessException;
 import com.sparta.foodorder.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -26,15 +31,17 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderMenuRepository orderMenuRepository;
-
+    private final PaymentService paymentService;
     private final StoreService storeService;
     private final MenuService menuService;
     private final UserService userService;
     private final OptionService optionService;
     private final OptionValueService optionValueService;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     private Order getOrder(UUID orderId) {
         return orderRepository.findById(orderId)
@@ -99,12 +106,23 @@ public class OrderService {
         return orderId;
     }
 
-    // 결제 끝나고 주문 상태 변경 (created -> pending) : 이벤트 발행하여 처리할 예정
-    // TODO : 결제 이벤트 발행
     public void cancelOrder(UUID orderId, Long userId) {
         Order order = getOrder(orderId);
         order.validateOrderWriter(userId);
         order.cancel();
+
+        // 이벤트 전송 (orderId 받으면 환불 처리)
+        Optional<Payment> optionalPayment = paymentService.findByOrderId(orderId);
+        if (optionalPayment.isPresent()) {
+            Payment payment = optionalPayment.get();
+            PaymentEvent.PaymentRefunded refunded = new PaymentEvent.PaymentRefunded(
+                    orderId,
+                    payment.getId(),
+                    "사용자 주문 취소"
+            );
+            applicationEventPublisher.publishEvent(refunded);
+            log.info("주문 취소 이벤트 발행 - orderId : {}", orderId);
+        }
     }
 
     public void acceptOrder(UUID orderId, Long userId) {

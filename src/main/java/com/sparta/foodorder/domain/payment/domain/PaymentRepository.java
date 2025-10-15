@@ -5,9 +5,11 @@ import java.util.UUID;
 
 public interface PaymentRepository {
 
-	Payment save(Payment payment);
+    Payment save(Payment payment);
 
-	Optional<Payment> findById(UUID id);
+    Optional<Payment> findById(UUID id);
 
-	boolean existsByOrderId(UUID OrderId);
+    boolean existsByOrderId(UUID OrderId);
+
+    Optional<Payment> findByOrderId(UUID orderId);
 }
