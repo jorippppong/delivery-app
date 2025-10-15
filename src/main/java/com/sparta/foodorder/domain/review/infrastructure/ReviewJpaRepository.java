@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sparta.foodorder.domain.review.application.dto.ReviewWithStoreName;
 import com.sparta.foodorder.domain.review.domain.Review;
 
 public interface ReviewJpaRepository extends JpaRepository<Review, UUID> {
@@ -16,8 +17,13 @@ public interface ReviewJpaRepository extends JpaRepository<Review, UUID> {
 
 	Page<Review> findByStoreIdAndDeletedAtIsNull(UUID storeId, Pageable pageable);
 
-	Page<Review> findByUserIdAndDeletedAtIsNull(Long userId, Pageable pageable);
-
-	@Query("SELECT AVG(r.rating) FROM Review r WHERE r.storeId = :storeId AND r.deletedAt IS NULL")
-	Double calculateAvgRatingByStoreId(@Param("storeId") UUID storeId);
+	@Query("""
+		SELECT new com.sparta.foodorder.domain.review.application.dto.ReviewWithStoreName(r, s.name)
+		FROM Review r
+		LEFT JOIN Store s ON r.storeId = s.id
+		WHERE r.userId = :userId 
+		AND r.deletedAt IS NULL
+		ORDER BY r.createdAt DESC
+		""")
+	Page<ReviewWithStoreName> findByUserIdWithStoreName(@Param("userId") Long userId, Pageable pageable);
 }

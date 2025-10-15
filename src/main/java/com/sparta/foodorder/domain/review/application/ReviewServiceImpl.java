@@ -12,6 +12,7 @@ import com.sparta.foodorder.domain.order.domain.OrderRepository;
 import com.sparta.foodorder.domain.order.domain.OrderStatus;
 import com.sparta.foodorder.domain.review.application.dto.ReviewCreateRequestDto;
 import com.sparta.foodorder.domain.review.application.dto.ReviewResponseDto;
+import com.sparta.foodorder.domain.review.application.dto.ReviewWithStoreName;
 import com.sparta.foodorder.domain.review.domain.Review;
 import com.sparta.foodorder.domain.review.domain.ReviewRepository;
 import com.sparta.foodorder.domain.review.domain.ReviewService;
@@ -82,14 +83,14 @@ public class ReviewServiceImpl implements ReviewService {
 	@Override
 	@Transactional(readOnly = true)
 	public PagedResponse<ReviewResponseDto> getMyReviews(Long userId, Pageable pageable) {
-		Page<Review> reviewPage = reviewRepository.findByUserId(userId, pageable);
+		Page<ReviewWithStoreName> resultPage = reviewRepository.findByUserIdWithStoreName(userId, pageable);
 
-		Page<ReviewResponseDto> dtoPage = reviewPage.map(review -> {
-			String storeName = storeRepository.findById(review.getStoreId())
-				.map(Store::getName)
-				.orElse("삭제된 가게");
-			return ReviewResponseDto.from(review, storeName);
-		});
+		Page<ReviewResponseDto> dtoPage = resultPage.map(result ->
+			ReviewResponseDto.from(
+				result.review(),
+				result.storeName() != null ? result.storeName() : "삭제된 가게"
+			)
+		);
 
 		return PagedResponse.of(dtoPage);
 	}
