@@ -17,23 +17,33 @@ public class StoreRepositoryImpl implements StoreRepository {
     private final StoreJpaRepository jpaRepository;
 
     @Override
-    public boolean existsByName(String name) {
-        return jpaRepository.existsByName(name);
+    public boolean existsByNameAndIsActiveTrue(String name) {
+        return jpaRepository.existsByNameAndIsActiveTrue(name);
     }
 
     @Override
-    public boolean existsByOwnerId(Long ownerId) {
-        return jpaRepository.existsByOwnerId(ownerId);
+    public boolean existsByOwnerIdAndIsActiveTrue(Long ownerId) {
+        return jpaRepository.existsByOwnerIdAndIsActiveTrue(ownerId);
     }
 
     @Override
-    public boolean existsByPhoneNumber(String phoneNumber) {
-        return jpaRepository.existsByPhoneNumber(phoneNumber);
+    public boolean existsByPhoneNumberAndIsActiveTrue(String phoneNumber) {
+        return jpaRepository.existsByPhoneNumberAndIsActiveTrue(phoneNumber);
     }
 
     @Override
     public Store save(Store store) {
         return jpaRepository.save(store);
+    }
+
+    @Override
+    public Optional<Store> findByIdAndIsActiveTrue(UUID id) {
+        return jpaRepository.findByIdAndIsActiveTrue(id);
+    }
+
+    @Override
+    public Optional<Store> findByIdAndDeletedAtIsNull(UUID id) {
+        return jpaRepository.findByIdAndDeletedAtIsNull(id);
     }
 
     @Override
@@ -52,7 +62,27 @@ public class StoreRepositoryImpl implements StoreRepository {
     }
 
     @Override
-    public Page<Store> findAllByNameContainingAndIsActiveTrue(String q, Pageable pageable) {
-        return jpaRepository.findAllByNameContainingAndIsActiveTrue(q, pageable);
+    public Page<Store> findAllByNameContainingIgnoreCaseAndIsActiveTrue(String q, Pageable pageable) {
+        return jpaRepository.findAllByNameContainingIgnoreCaseAndIsActiveTrue(q, pageable);
+    }
+
+    @Override
+    public Page<Store> findAllByDeletedAtIsNull(Pageable pageable) {
+        return jpaRepository.findAllByDeletedAtIsNull(pageable);
+    }
+
+    @Override
+    public Page<Store> findAllByNameContainingIgnoreCaseAndDeletedAtIsNull(String q, Pageable pageable) {
+        return jpaRepository.findAllByNameContainingIgnoreCaseAndDeletedAtIsNull(q, pageable);
+    }
+
+    @Override
+    public Page<Store> findAllByIsActiveTrueAndStoreCategoriesCategoryId(UUID categoryId, Pageable pageable) {
+        return jpaRepository.findAllByIsActiveTrueAndStoreCategories_Category_Id(categoryId, pageable);
+    }
+
+    @Override
+    public Page<Store> findAllByDeletedAtIsNullAndStoreCategoriesCategoryId(UUID categoryId, Pageable pageable) {
+        return jpaRepository.findAllByDeletedAtIsNullAndStoreCategories_Category_Id(categoryId, pageable);
     }
 }
