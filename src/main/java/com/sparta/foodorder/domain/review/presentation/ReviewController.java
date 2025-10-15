@@ -20,9 +20,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.sparta.foodorder.domain.auth.infrastructure.CustomUserDetails;
 import com.sparta.foodorder.domain.review.application.dto.ReviewCreateRequestDto;
-import com.sparta.foodorder.domain.review.application.dto.ReviewPageResponseDto;
 import com.sparta.foodorder.domain.review.application.dto.ReviewResponseDto;
 import com.sparta.foodorder.domain.review.domain.ReviewService;
+import com.sparta.foodorder.global.dto.PagedResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
@@ -55,7 +55,7 @@ public class ReviewController {
 	@Operation(summary = "가게 리뷰 조회", description = "특정 가게의 리뷰 목록을 조회합니다")
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/stores/{storeId}")
-	public ResponseEntity<ReviewPageResponseDto> getStoreReviews(
+	public ResponseEntity<PagedResponse<ReviewResponseDto>> getStoreReviews(
 		@PathVariable UUID storeId,
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size,
@@ -71,14 +71,14 @@ public class ReviewController {
 			: Sort.Direction.DESC;
 		Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sort));
 
-		ReviewPageResponseDto response = reviewService.getStoreReviews(storeId, pageable);
+		PagedResponse<ReviewResponseDto> response = reviewService.getStoreReviews(storeId, pageable);
 		return ResponseEntity.ok(response);
 	}
 
 	@Operation(summary = "내 리뷰 조회", description = "로그인한 사용자가 작성한 리뷰 목록을 조회합니다")
 	@PreAuthorize("hasRole('USER')")
 	@GetMapping("/my")
-	public ResponseEntity<ReviewPageResponseDto> getMyReviews(
+	public ResponseEntity<PagedResponse<ReviewResponseDto>> getMyReviews(
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size,
 		@RequestParam(defaultValue = "createdAt") String sort,
@@ -94,7 +94,7 @@ public class ReviewController {
 			: Sort.Direction.DESC;
 		Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sort));
 
-		ReviewPageResponseDto response = reviewService.getMyReviews(userDetails.getUserId(), pageable);
+		PagedResponse<ReviewResponseDto> response = reviewService.getMyReviews(userDetails.getUserId(), pageable);
 		return ResponseEntity.ok(response);
 	}
 

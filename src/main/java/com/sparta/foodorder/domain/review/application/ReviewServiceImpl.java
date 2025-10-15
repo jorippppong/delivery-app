@@ -11,7 +11,6 @@ import com.sparta.foodorder.domain.order.domain.Order;
 import com.sparta.foodorder.domain.order.domain.OrderRepository;
 import com.sparta.foodorder.domain.order.domain.OrderStatus;
 import com.sparta.foodorder.domain.review.application.dto.ReviewCreateRequestDto;
-import com.sparta.foodorder.domain.review.application.dto.ReviewPageResponseDto;
 import com.sparta.foodorder.domain.review.application.dto.ReviewResponseDto;
 import com.sparta.foodorder.domain.review.domain.Review;
 import com.sparta.foodorder.domain.review.domain.ReviewRepository;
@@ -19,6 +18,7 @@ import com.sparta.foodorder.domain.review.domain.ReviewService;
 import com.sparta.foodorder.domain.store.domain.Store;
 import com.sparta.foodorder.domain.store.domain.StoreRepository;
 import com.sparta.foodorder.domain.user.domain.UserRole;
+import com.sparta.foodorder.global.dto.PagedResponse;
 import com.sparta.foodorder.global.exception.BusinessException;
 import com.sparta.foodorder.global.exception.ErrorCode;
 
@@ -68,21 +68,20 @@ public class ReviewServiceImpl implements ReviewService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public ReviewPageResponseDto getStoreReviews(UUID storeId, Pageable pageable) {
+	public PagedResponse<ReviewResponseDto> getStoreReviews(UUID storeId, Pageable pageable) {
 		storeRepository.findById(storeId)
 			.orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
 
 		Page<Review> reviewPage = reviewRepository.findByStoreId(storeId, pageable);
+
 		Page<ReviewResponseDto> dtoPage = reviewPage.map(ReviewResponseDto::from);
 
-		Double avgRating = reviewRepository.calculateAvgRatingByStoreId(storeId);
-
-		return ReviewPageResponseDto.from(dtoPage, avgRating != null ? avgRating : 0.0);
+		return PagedResponse.of(dtoPage);
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public ReviewPageResponseDto getMyReviews(Long userId, Pageable pageable) {
+	public PagedResponse<ReviewResponseDto> getMyReviews(Long userId, Pageable pageable) {
 		Page<Review> reviewPage = reviewRepository.findByUserId(userId, pageable);
 
 		Page<ReviewResponseDto> dtoPage = reviewPage.map(review -> {
@@ -92,7 +91,7 @@ public class ReviewServiceImpl implements ReviewService {
 			return ReviewResponseDto.from(review, storeName);
 		});
 
-		return ReviewPageResponseDto.from(dtoPage);
+		return PagedResponse.of(dtoPage);
 	}
 
 	@Override
