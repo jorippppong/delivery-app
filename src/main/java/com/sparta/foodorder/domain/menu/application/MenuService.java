@@ -3,10 +3,13 @@ package com.sparta.foodorder.domain.menu.application;
 import com.sparta.foodorder.domain.auth.infrastructure.CustomUserDetails;
 import com.sparta.foodorder.domain.menu.domain.Menu;
 import com.sparta.foodorder.domain.menu.domain.MenuRepository;
+import com.sparta.foodorder.domain.menu.domain.Option;
 import com.sparta.foodorder.domain.menu.presentation.dto.MenuCreateRequestDto;
 import com.sparta.foodorder.domain.menu.presentation.dto.MenuResponseDto;
 import com.sparta.foodorder.domain.menu.presentation.dto.MenuUpdateRequestDto;
+import com.sparta.foodorder.domain.menu.presentation.dto.OptionCreateRequestDto;
 import com.sparta.foodorder.domain.store.domain.Store;
+import com.sparta.foodorder.domain.store.domain.StoreRepository;
 import com.sparta.foodorder.domain.store.domain.StoreService;
 import com.sparta.foodorder.domain.user.domain.UserRole;
 import com.sparta.foodorder.global.exception.BusinessException;
@@ -29,6 +32,7 @@ import java.util.UUID;
 public class MenuService {
     private final MenuRepository menuRepository;
     private final StoreService storeService;
+    private final StoreRepository storeRepository;
 
     public MenuResponseDto insertMenu(MenuCreateRequestDto requestDto, UUID storeId, Long userId) {
         log.info("로그인한 사용자 id : {}", userId);
@@ -46,6 +50,42 @@ public class MenuService {
         } else {
             throw new BusinessException(ErrorCode.STORE_NOT_FOUND);
         }
+    }
+
+    @Transactional
+    public MenuResponseDto createOption(OptionCreateRequestDto requestDto, UUID menuId, CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
+        boolean isOwner = storeRepository.findByOwnerId(userId).isPresent();
+        boolean isMasterOrManager = checkAdminAuthorization(userDetails);
+
+        //#1 . 생성 권한이 있나 확인
+        if(!isOwner && ! isMasterOrManager) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED);
+        }
+        Store store;
+        Menu menu = menuRepository.findById(menuId).orElseThrow(() -> new BusinessException(ErrorCode.MENU_NOT_FOUND));
+
+        if(isOwner) {
+            //#2. 오너면 가게 주인이 맞나 확인
+            store = storeRepository.findByOwnerId(userId).orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
+
+            if(store.isDeleted()) {
+                throw new BusinessException(ErrorCode.STORE_NOT_FOUND);
+            }
+            if(!menu.getStore().getId().equals(store.getId())) {
+                throw new BusinessException(ErrorCode.MENU_NOT_FOUND);
+            }
+
+            return saveOption(menu, requestDto);
+        }
+
+        UUID storeId = menu.getStore().getId();
+        store =  storeRepository.findById(storeId).orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
+        if(store.isDeleted()) {
+            throw new BusinessException(ErrorCode.STORE_NOT_FOUND);
+        }
+
+        return saveOption(menu, requestDto);
     }
 
     @Transactional(readOnly = true)
@@ -172,5 +212,18 @@ public class MenuService {
 
     public List<Menu> findAllByIds(List<UUID> menuIds) {
         return menuRepository.findAllByIds(menuIds);
+    }
+
+    public boolean checkAdminAuthorization (CustomUserDetails userDetails) {
+        UserRole userRole = userDetails.getRole();
+        return userRole == UserRole.MASTER || userRole == UserRole.MANAGER;
+    }
+
+    private MenuResponseDto saveOption(Menu menu, OptionCreateRequestDto requestDto) {
+        Option option = requestDto.toEntity(menu);
+        menu.getOptions().add(option);
+        menuRepository.saveAndFlush(menu);
+        log.info("option : {}", option.getId());
+        return MenuResponseDto.from(menu);
     }
 }

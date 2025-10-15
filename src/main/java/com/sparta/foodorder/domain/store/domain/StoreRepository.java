@@ -21,4 +21,7 @@ public interface StoreRepository {
     Page<Store> findAllByIsActiveTrue(Pageable pageable);
 
     Page<Store> findAllByNameContainingAndIsActiveTrue(String q, Pageable pageable);
+
+    Optional<Store> findByOwnerId(Long ownerId);
+
 }

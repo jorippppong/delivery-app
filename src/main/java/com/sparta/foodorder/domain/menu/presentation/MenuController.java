@@ -6,6 +6,7 @@ import com.sparta.foodorder.domain.menu.application.MenuService;
 import com.sparta.foodorder.domain.menu.presentation.dto.MenuCreateRequestDto;
 import com.sparta.foodorder.domain.menu.presentation.dto.MenuResponseDto;
 import com.sparta.foodorder.domain.menu.presentation.dto.MenuUpdateRequestDto;
+import com.sparta.foodorder.domain.menu.presentation.dto.OptionCreateRequestDto;
 import com.sparta.foodorder.domain.user.domain.UserRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -50,6 +51,19 @@ public class MenuController {
 
     }
 
+    @Operation(summary = "옵션 생성", description = "이미 존재하는 메뉴의 새로운 옵션을 생성합니다.")
+    @PostMapping("/{menuId}/options")
+    @PreAuthorize("hasAnyRole('OWNER','MANAGER','MASTER')")
+    public ResponseEntity<MenuResponseDto> createOption(@PathVariable UUID menuId,
+                                                        @RequestBody @Valid OptionCreateRequestDto requestDto,
+                                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        MenuResponseDto menuResponseDto = menuService.createOption(requestDto, menuId, userDetails);
+        return ResponseEntity.ok(menuResponseDto);
+
+    }
+
+
     @Operation(summary = "전체 메뉴 조회", description = "해당 가게의 모든 메뉴를 조회합니다.")
     @GetMapping
     public ResponseEntity<List<MenuResponseDto>> getAllMenus(@PathVariable UUID storeId,
@@ -91,7 +105,7 @@ public class MenuController {
     }
 
     @Operation(summary = "메뉴 삭제", description = "해당 가게의 특정 메뉴를 삭제합니다.")
-    @PreAuthorize("hasAnyRole('OWNER','MANAGER','ADMIN')")
+    @PreAuthorize("hasAnyRole('OWNER','MANAGER','MASTER')")
     @DeleteMapping("/{menuId}")
     public ResponseEntity<Void> deleteMenu(@PathVariable UUID storeId,
         @PathVariable UUID menuId,
