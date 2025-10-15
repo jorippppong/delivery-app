@@ -4,19 +4,21 @@ import com.sparta.foodorder.domain.auth.infrastructure.CustomUserDetails;
 import com.sparta.foodorder.domain.menu.domain.Menu;
 import com.sparta.foodorder.domain.menu.domain.MenuRepository;
 import com.sparta.foodorder.domain.menu.domain.Option;
-import com.sparta.foodorder.domain.menu.presentation.dto.MenuCreateRequestDto;
-import com.sparta.foodorder.domain.menu.presentation.dto.MenuResponseDto;
-import com.sparta.foodorder.domain.menu.presentation.dto.MenuUpdateRequestDto;
-import com.sparta.foodorder.domain.menu.presentation.dto.OptionCreateRequestDto;
+import com.sparta.foodorder.domain.menu.presentation.dto.*;
 import com.sparta.foodorder.domain.store.domain.Store;
 import com.sparta.foodorder.domain.store.domain.StoreRepository;
 import com.sparta.foodorder.domain.store.domain.StoreService;
 import com.sparta.foodorder.domain.user.domain.UserRole;
+import com.sparta.foodorder.global.dto.PagedResponse;
 import com.sparta.foodorder.global.exception.BusinessException;
 import com.sparta.foodorder.global.exception.ErrorCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -226,4 +228,22 @@ public class MenuService {
         log.info("option : {}", option.getId());
         return MenuResponseDto.from(menu);
     }
+
+    public PagedResponse<MenuSearchResponseDto> searchMenus(String searchString, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Page<Menu> menuPage = menuRepository.findByNameContaining(searchString, pageable);
+        log.info("menuPage 데이터 존재? : {} " , menuPage.toString());
+        List<MenuSearchResponseDto> menuSearchResponseDtoList = menuPage.getContent().stream()
+                .filter(menu -> !menu.isDeleted())
+                .filter(menu -> menu.isActive())
+                .filter(menu -> !menu.isHidden())
+                .map(MenuSearchResponseDto::fromEntity)
+                .toList();
+
+        boolean hasNext = menuPage.hasNext();
+        return PagedResponse.success(menuSearchResponseDtoList, page,size, hasNext);
+    }
+
+
 }

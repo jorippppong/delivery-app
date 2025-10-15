@@ -3,11 +3,9 @@ package com.sparta.foodorder.domain.menu.presentation;
 
 import com.sparta.foodorder.domain.auth.infrastructure.CustomUserDetails;
 import com.sparta.foodorder.domain.menu.application.MenuService;
-import com.sparta.foodorder.domain.menu.presentation.dto.MenuCreateRequestDto;
-import com.sparta.foodorder.domain.menu.presentation.dto.MenuResponseDto;
-import com.sparta.foodorder.domain.menu.presentation.dto.MenuUpdateRequestDto;
-import com.sparta.foodorder.domain.menu.presentation.dto.OptionCreateRequestDto;
+import com.sparta.foodorder.domain.menu.presentation.dto.*;
 import com.sparta.foodorder.domain.user.domain.UserRole;
+import com.sparta.foodorder.global.dto.PagedResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -18,14 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "메뉴", description = "메뉴 API")
 @RequestMapping("/v1/stores/{storeId}/menus")
@@ -113,5 +104,19 @@ public class MenuController {
         menuService.deleteMenu(storeId, menuId, user);
         return ResponseEntity.ok().build();
     }
+
+//    @GetMapping("/search")
+//    public ResponseEntity<PagedResponse<MenuSearchResponseDto>> searchMenus(
+//            @RequestParam String searchString,
+//            @RequestParam(defaultValue = "0") int page, //0부터 시작해야할까
+//            @RequestParam(defaultValue = "10") int size
+//    ) {
+//        if( size != 10 && size != 30 && size != 50) {
+//            size = 10;
+//        }
+//        PagedResponse<MenuSearchResponseDto> response = menuService.searchMenus(searchString, page, size);
+//        return ResponseEntity.ok(response);
+//    }
+
 
 }
