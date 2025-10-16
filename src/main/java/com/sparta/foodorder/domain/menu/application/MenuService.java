@@ -34,8 +34,6 @@ public class MenuService {
     private final OptionValueRepository optionValueRepository;
     private final StoreService storeService;
     private final StoreRepository storeRepository;
-    private final OptionRepository optionRepository;
-    private final OptionValueRepository optionValueRepository;
 
     public MenuResponseDto insertMenu(MenuCreateRequestDto requestDto, UUID storeId, Long userId) {
         log.info("로그인한 사용자 id : {}", userId);
@@ -391,17 +389,17 @@ public class MenuService {
     }
 
     private Option getValidOptionOfMenu(UUID optionId, UUID menuId) {
-        return optionRepository.findByIdAndMenu_IdAndDeletedAtIsNull(optionId, menuId)
+        return optionRepository.findByIdAndMenuIdAndDeletedAtIsNull(optionId, menuId)
             .orElseThrow(() -> new BusinessException(ErrorCode.OPTION_NOT_FOUND));
     }
 
     private OptionValue getValidOptionValueOfOption(UUID optionValueId, UUID optionId) {
-        return optionValueRepository.findByIdAndOption_IdAndDeletedAtIsNull(optionValueId, optionId)
+        return optionValueRepository.findByIdAndOptionIdAndDeletedAtIsNull(optionValueId, optionId)
             .orElseThrow(() -> new BusinessException(ErrorCode.OPTION_VALUE_NOT_FOUND));
     }
 
     private void validateOptionInMenu(UUID optionId, UUID menuId) {
-        if (!optionRepository.existsByIdAndMenu_idAndDeletedAtIsNull(optionId, menuId)) {
+        if (!optionRepository.existsByIdAndMenuIdAndDeletedAtIsNull(optionId, menuId)) {
             throw new BusinessException(ErrorCode.OPTION_NOT_FOUND);
         }
     }

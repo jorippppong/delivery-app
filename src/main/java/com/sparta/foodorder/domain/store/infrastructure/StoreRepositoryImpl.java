@@ -90,9 +90,4 @@ public class StoreRepositoryImpl implements StoreRepository {
     public Optional<Store> findByOwnerId(Long ownerId) {
         return jpaRepository.findByOwnerId(ownerId);
     }
-
-    @Override
-    public Optional<Store> findByIdAndIsActiveTrue(UUID id) {
-        return jpaRepository.findByIdAndIsActiveTrue(id);
-    }
 }

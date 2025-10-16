@@ -35,6 +35,16 @@ public class OptionRepositoryImpl implements OptionRepository {
     }
 
     @Override
+    public Optional<Option> findByIdAndMenuIdAndDeletedAtIsNull(UUID optionId, UUID menuId) {
+        return optionJpaRepository.findByIdAndMenu_IdAndDeletedAtIsNull(optionId, menuId);
+    }
+
+    @Override
+    public boolean existsByIdAndMenuIdAndDeletedAtIsNull(UUID optionId, UUID menuId) {
+        return optionJpaRepository.existsByIdAndMenu_idAndDeletedAtIsNull(optionId, menuId);
+    }
+
+    @Override
     public List<Option> findAllByMenuIdAndDeletedAtIsNull(UUID menuId) {
         return optionJpaRepository.findAllByMenuIdAndDeletedAtIsNull(menuId);
     }

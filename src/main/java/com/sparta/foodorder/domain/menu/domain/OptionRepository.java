@@ -6,20 +6,20 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface OptionRepository extends JpaRepository<Option, UUID> {
+public interface OptionRepository {
 
     Option findByMenuId(UUID menuId);
+
+    List<Option> findAllByMenuId(UUID menuId);
 
     Option save(Option option);
 
     Optional<Option> findById(UUID id);
 
-    Optional<Option> findByIdAndMenu_IdAndDeletedAtIsNull(UUID optionId, UUID menuId);
+    Optional<Option> findByIdAndMenuIdAndDeletedAtIsNull(UUID optionId, UUID menuId);
 
-    boolean existsByIdAndMenu_idAndDeletedAtIsNull(UUID optionId, UUID menuId);
-  
-    List<Option> findAllByMenuId(UUID menuId);
+    boolean existsByIdAndMenuIdAndDeletedAtIsNull(UUID optionId, UUID menuId);
+
   
     List<Option> findAllByMenuIdAndDeletedAtIsNull(UUID menuId);
 
