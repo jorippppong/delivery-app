@@ -82,7 +82,6 @@ public class MenuController {
                                                    @RequestParam UUID storeId) {
         UserRole userRole = userDetails.getRole();
 
-        //권한체크를 서비스에서할지 컨트롤러에서할지 한곳에서만 해야 좋음
         if(userRole == UserRole.USER) {
             log.info("메뉴 단일 조회 - 유저");
             MenuResponseDto responseDto = menuService.getMenuForUser(menuId,storeId);
@@ -140,7 +139,7 @@ public class MenuController {
     @GetMapping("/search")
     public ResponseEntity<PagedResponse<MenuSearchResponseDto>> searchMenus(
             @RequestParam String searchString,
-            @RequestParam(defaultValue = "0") int page, //0부터 시작해야할까
+            @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         if( size != 10 && size != 30 && size != 50) {

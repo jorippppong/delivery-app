@@ -33,7 +33,6 @@ public class MenuService {
     private final MenuRepository menuRepository;
     private final OptionRepository optionRepository;
     private final OptionValueRepository optionValueRepository;
-    private final StoreService storeService;
     private final StoreRepository storeRepository;
 
     public MenuResponseDto insertMenu(MenuCreateRequestDto requestDto, CustomUserDetails userDetails) {
@@ -175,7 +174,6 @@ public class MenuService {
         Store store = storeRepository.findById(storeId).orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
 
         List<Menu> menu;
-        //권한별로 다른 데이터를 반환해야되니까 권한체크 여기서
 
         if(userRole == UserRole.MANAGER||userRole == UserRole.MASTER) {
             log.info("관리자 메뉴조회");
@@ -284,8 +282,6 @@ public class MenuService {
                 .orElse(false);
         boolean isMasterOrManager = checkAdminAuthorization(userDetails);
 
-        //✅가게 active 상태인지 delete상태인지 권한별로 검증
-
         // 4. 일반 사용자 및 오너 검증
         if (!isMasterOrManager) {
             log.info("USER/OWNER의 조회요청");
@@ -314,7 +310,6 @@ public class MenuService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENU_NOT_FOUND));
 
 
-        //✅권한별 가게 삭제상태, 활성화상태 확인
         Store checkStore = menu.getStore();
         if (!checkStore.getIsActive() || checkStore.isDeleted()) {
             log.info("가게가 삭제되거나 비활성화상태");
@@ -394,14 +389,9 @@ public class MenuService {
                         requestDto.isActive()
                 );
                 Menu savedMenu = menuRepository.save(menu); //엔티티변경시 더티체킹이 일어나서 save필요없음 (명시적으로 보여줄거면 해도된다)
-                /**
-                 * entityManager.flush();
-                 * entityManager.clear();
-                 * repotitory.findById로 조회해서 responseDto에 담아야 실제 db데이터 값이 리턴됨
-                 */
+
                 MenuResponseDto responseDto = MenuResponseDto.from(savedMenu);
-                //insert,update같은거할 때 void로 보냄
-                //실제로 db에 저장된 데이터가아닌, 우리가 만든데이터가 리턴될수도있어서 void리턴후 확인할때는 다시조회하는 방식
+
 
                 return responseDto;
             } else throw new BusinessException(ErrorCode.MENU_NOT_FOUND);
@@ -426,8 +416,6 @@ public class MenuService {
             );
             Menu savedMenu = menuRepository.save(menu);
             MenuResponseDto responseDto = MenuResponseDto.from(savedMenu);
-            //insert,update같은거할 때 void로 보냄
-            //실제로 db에 저장된 데이터가아닌, 우리가 만든데이터가 리턴될수도있어서 void리턴후 확인할때는 다시조회하는 방식
             return responseDto;
 
         } else throw new BusinessException(ErrorCode.MENU_NOT_FOUND);
@@ -439,18 +427,12 @@ public class MenuService {
         boolean isOwner = storeRepository.findByOwnerId(userId).isPresent();
         boolean isMasterOrManager = checkAdminAuthorization(userDetails);
 
-        //가게 주인이나 관리자가 아니면 권한없음)
         if(!isOwner && ! isMasterOrManager) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
-        /**
-         * 가게 메뉴가 맞는지 확인
-         * 이미 삭제된 메뉴가 아닌지  확인
-         * 삭제하면 해당 메뉴에 속한 option, optionValue에도 삭제처리 되나 확인
-         */
-        //삭제할 메뉴 조회
+
         Menu menu = menuRepository.findById(menuId).orElseThrow(() -> new BusinessException(ErrorCode.MENU_NOT_FOUND));
-        if(menu.isDeleted()) throw new BusinessException(ErrorCode.MENU_NOT_FOUND); //이미 삭제된 상품입니다 errorCode 추가하자
+        if(menu.isDeleted()) throw new BusinessException(ErrorCode.MENU_NOT_FOUND);
 
 
         String username = userDetails.getUsername();
