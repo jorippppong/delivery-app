@@ -33,4 +33,9 @@ public class OptionRepositoryImpl implements OptionRepository {
     public Optional<Option> findById(UUID optionId) {
         return optionJpaRepository.findById(optionId);
     }
+
+    @Override
+    public List<Option> findAllByMenuIdAndDeletedAtIsNull(UUID menuId) {
+        return optionJpaRepository.findAllByMenuIdAndDeletedAtIsNull(menuId);
+    }
 }

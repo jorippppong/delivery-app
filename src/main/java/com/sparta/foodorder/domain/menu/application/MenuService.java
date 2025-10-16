@@ -1,9 +1,7 @@
 package com.sparta.foodorder.domain.menu.application;
 
 import com.sparta.foodorder.domain.auth.infrastructure.CustomUserDetails;
-import com.sparta.foodorder.domain.menu.domain.Menu;
-import com.sparta.foodorder.domain.menu.domain.MenuRepository;
-import com.sparta.foodorder.domain.menu.domain.Option;
+import com.sparta.foodorder.domain.menu.domain.*;
 import com.sparta.foodorder.domain.menu.presentation.dto.*;
 import com.sparta.foodorder.domain.store.domain.Store;
 import com.sparta.foodorder.domain.store.domain.StoreRepository;
@@ -35,6 +33,8 @@ public class MenuService {
     private final MenuRepository menuRepository;
     private final StoreService storeService;
     private final StoreRepository storeRepository;
+    private final OptionRepository optionRepository;
+    private final OptionValueRepository optionValueRepository;
 
     public MenuResponseDto insertMenu(MenuCreateRequestDto requestDto, UUID storeId, Long userId) {
         log.info("로그인한 사용자 id : {}", userId);
@@ -153,6 +153,75 @@ public class MenuService {
 
     }
 
+
+    public List<OptionResponseDto> getOptions(UUID menuId, CustomUserDetails userDetails) {
+
+        //메뉴 존재 검증
+        Menu menu = menuRepository.findById(menuId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MENU_NOT_FOUND));
+
+        // 2. 권한 확인
+        Long userId = userDetails.getUserId();
+        boolean isOwner = storeRepository.findByOwnerId(userId)
+                .map(store -> store.getId().equals(menu.getStore().getId()))
+                .orElse(false);
+        boolean isMasterOrManager = checkAdminAuthorization(userDetails);
+
+
+        // 3. 활성화 여부 검증 (권한 없는 일반 사용자는 비활성 메뉴 접근 금지)
+        if (!isOwner && !isMasterOrManager) {
+            if (!menu.isActive() || menu.isHidden()) {
+                throw new BusinessException(ErrorCode.MENU_NOT_FOUND);
+            }
+        }
+
+        List<Option> optionList = optionRepository.findAllByMenuIdAndDeletedAtIsNull(menuId);
+        return optionList.stream().map(OptionResponseDto::from).toList();
+    }
+
+
+    public List<OptionValueResponseDto> getOptionValues(UUID menuId, UUID optionId, CustomUserDetails userDetails)  {
+        // 1. 메뉴 존재 여부
+        Menu menu = menuRepository.findById(menuId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MENU_NOT_FOUND));
+
+        Store checkStore = menu.getStore();
+        if (!checkStore.getIsActive() || checkStore.isDeleted()) {
+            throw new BusinessException(ErrorCode.STORE_NOT_FOUND);
+        }
+
+        // 2. 권한 확인
+        Long userId = userDetails.getUserId();
+        boolean isOwner = storeRepository.findByOwnerId(userId)
+                .map(store -> store.getId().equals(menu.getStore().getId()))
+                .orElse(false);
+        boolean isMasterOrManager = checkAdminAuthorization(userDetails);
+
+
+        // 4. 일반 사용자 및 오너 검증
+        if (!isMasterOrManager) {
+            // 메뉴 삭제된 경우 접근 불가
+            if (menu.isDeleted()) {
+                throw new BusinessException(ErrorCode.MENU_NOT_FOUND);
+            }
+            // 일반 사용자는 활성화/숨김 상태도 체크
+            if (!isOwner && (!menu.isActive() || menu.isHidden())) {
+                throw new BusinessException(ErrorCode.MENU_NOT_FOUND);
+            }
+        }
+
+        // 5. 옵션 조회 (OWNER와 일반 사용자는 deleted 제외, MASTER/Manager는 모두 조회)
+        List<OptionValue> optionValueList;
+        if (isMasterOrManager) {
+            optionValueList = optionValueRepository.findAllByOptionId(optionId);
+        } else {
+            optionValueList = optionValueRepository.findAllByOptionIdAndDeletedAtIsNull(optionId);
+        }
+        return optionValueList.stream().map(OptionValueResponseDto::from).toList();
+
+    }
+
+
     public MenuResponseDto updateMenu(UUID storeId, UUID menuId,
         @Valid MenuUpdateRequestDto requestDto, Long userId) {
         //가게 존재 및 소유자 검증
@@ -225,7 +294,6 @@ public class MenuService {
         Option option = requestDto.toEntity(menu);
         menu.getOptions().add(option);
         menuRepository.saveAndFlush(menu);
-        log.info("option : {}", option.getId());
         return MenuResponseDto.from(menu);
     }
 

@@ -22,4 +22,9 @@ public class OptionValueRepositoryImpl implements OptionValueRepository {
     public List<OptionValue> findAllByOptionId(UUID optionId) {
         return optionValueJpaRepository.findAllByOptionId(optionId);
     }
+
+    @Override
+    public List<OptionValue> findAllByOptionIdAndDeletedAtIsNull(UUID optionId) {
+        return optionValueJpaRepository.findAllByOptionIdAndDeletedAtIsNull(optionId);
+    }
 }

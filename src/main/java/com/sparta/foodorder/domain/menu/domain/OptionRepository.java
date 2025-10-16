@@ -9,4 +9,6 @@ public interface OptionRepository {
     Option findByMenuId(UUID menuId);
     List<Option> findAllByMenuId(UUID menuId);
     Option save(Option option);
+    List<Option> findAllByMenuIdAndDeletedAtIsNull(UUID menuId);
+
 }

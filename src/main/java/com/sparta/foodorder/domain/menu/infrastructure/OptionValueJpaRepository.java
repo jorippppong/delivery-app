@@ -8,5 +8,7 @@ import java.util.UUID;
 
 public interface OptionValueJpaRepository extends JpaRepository<OptionValue, UUID> {
     List<OptionValue> findAllByOptionId(UUID optionId);
+    List<OptionValue> findAllByOptionIdAndDeletedAtIsNull(UUID optionId);
+
 
 }
