@@ -101,7 +101,6 @@ public class MenuService {
 
         } else if (userRole == UserRole.USER || !store.getOwnerId().equals(user.getUserId())) {
             menu = menuRepository.findByStoreIdAndActiveTrueAndHiddenFalseAndDeletedAtIsNull(storeId);
-
         } else {
             menu = menuRepository.findByStoreIdAndDeletedAtIsNull(storeId);
         }
@@ -149,7 +148,6 @@ public class MenuService {
         }
 
         if (store.getOwnerId().equals(user.getUserId()) || userRole == UserRole.MANAGER || userRole == UserRole.MASTER) {
-
             if (menu.isDeleted()) {
                 throw new BusinessException(ErrorCode.MENU_NOT_FOUND);
             } else {
