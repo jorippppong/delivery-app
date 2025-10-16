@@ -33,4 +33,7 @@ public interface StoreRepository {
     Page<Store> findAllByIsActiveTrueAndStoreCategoriesCategoryId(UUID categoryId, Pageable pageable);
 
     Page<Store> findAllByDeletedAtIsNullAndStoreCategoriesCategoryId(UUID categoryId, Pageable pageable);
+
+    Optional<Store> findByOwnerId(Long ownerId);
+
 }

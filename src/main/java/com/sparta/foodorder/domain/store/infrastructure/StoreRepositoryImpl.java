@@ -85,4 +85,9 @@ public class StoreRepositoryImpl implements StoreRepository {
     public Page<Store> findAllByDeletedAtIsNullAndStoreCategoriesCategoryId(UUID categoryId, Pageable pageable) {
         return jpaRepository.findAllByDeletedAtIsNullAndStoreCategories_Category_Id(categoryId, pageable);
     }
+
+    @Override
+    public Optional<Store> findByOwnerId(Long ownerId) {
+        return jpaRepository.findByOwnerId(ownerId);
+    }
 }

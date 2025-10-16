@@ -34,4 +34,7 @@ public interface StoreJpaRepository extends JpaRepository<Store, UUID> {
     Page<Store> findAllByIsActiveTrueAndStoreCategories_Category_Id(UUID categoryId, Pageable pageable);
 
     Page<Store> findAllByDeletedAtIsNullAndStoreCategories_Category_Id(UUID categoryId, Pageable pageable);
+
+    Optional<Store> findByOwnerId(Long ownerId);
+
 }

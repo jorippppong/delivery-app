@@ -41,7 +41,7 @@ public class Menu extends BaseEntity {
     @Column(name = "is_active")
     private boolean active = true;
 
-    @OneToMany(mappedBy = "menu", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
+    @OneToMany(mappedBy = "menu", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Option> options = new ArrayList<>();
 
     private Menu(String name, String description, Integer price, Store store,
