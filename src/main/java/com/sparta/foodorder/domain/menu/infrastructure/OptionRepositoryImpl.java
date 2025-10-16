@@ -48,4 +48,5 @@ public class OptionRepositoryImpl implements OptionRepository {
     public List<Option> findAllByMenuIdAndDeletedAtIsNull(UUID menuId) {
         return optionJpaRepository.findAllByMenuIdAndDeletedAtIsNull(menuId);
     }
+
 }

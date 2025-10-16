@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class OrderMenuImplRepository implements OrderMenuRepository {
+public class OrderMenuRepositoryImpl implements OrderMenuRepository {
     private final OrderMenuJpaRepository orderMenuJpaRepository;
 
     @Override
