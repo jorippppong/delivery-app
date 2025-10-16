@@ -40,12 +40,7 @@ public class AuthServiceImpl implements AuthService {
     private final TokenBlacklistService tokenBlacklistService;
     private final RefreshTokenService refreshTokenService;
     
-    @Value("${cookie.secure}")
-    private boolean cookieSecure;
-    
-    @Value("${cookie.same-site}")
-    private String cookieSameSite;
-    
+        
     @Override
     @Transactional
     public LoginResponseDto login(LoginRequestDto requestDto, HttpServletResponse response) {
@@ -236,8 +231,8 @@ public class AuthServiceImpl implements AuthService {
         ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", accessToken)
                 .path("/")
                 .httpOnly(true)
-                .secure(cookieSecure) // 환경별 설정
-                .sameSite(cookieSameSite) // 환경별 설정
+                .secure(false) // 환경별 설정
+                .sameSite("Lax") // 환경별 설정
                 .maxAge(JwtTokenizer.ACCESS_TOKEN_EXPIRE_COUNT / 1000) // 초 단위
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
@@ -246,13 +241,13 @@ public class AuthServiceImpl implements AuthService {
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .path("/")
                 .httpOnly(true)
-                .secure(cookieSecure) // 환경별 설정
-                .sameSite(cookieSameSite) // 환경별 설정
+                .secure(false) // 환경별 설정
+                .sameSite("Lax") // 환경별 설정
                 .maxAge(JwtTokenizer.REFRESH_TOKEN_EXPIRE_COUNT / 1000) // 초 단위
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
         
-        log.info("쿠키 설정 완료 (secure={}, sameSite={})", cookieSecure, cookieSameSite);
+        log.info("쿠키 설정 완료 (secure=false, sameSite=Lax)");
     }
 
     /**
@@ -262,8 +257,8 @@ public class AuthServiceImpl implements AuthService {
         // 쿠키 삭제 시 생성할 때와 동일한 설정 사용
         ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", "")
                 .path("/")
-                .sameSite(cookieSameSite)  // 생성 시와 동일
-                .secure(cookieSecure)      // 생성 시와 동일
+                .sameSite("Lax")  // 생성 시와 동일
+                .secure(false)      // 생성 시와 동일
                 .httpOnly(true)
                 .maxAge(0)
                 .build();
@@ -271,14 +266,14 @@ public class AuthServiceImpl implements AuthService {
         
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", "")
                 .path("/")
-                .sameSite(cookieSameSite)  // 생성 시와 동일
-                .secure(cookieSecure)      // 생성 시와 동일
+                .sameSite("Lax")  // 생성 시와 동일
+                .secure(false)      // 생성 시와 동일
                 .httpOnly(true)
                 .maxAge(0)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
         
-        log.info("쿠키 삭제 완료 (secure={}, sameSite={})", cookieSecure, cookieSameSite);
+        log.info("쿠키 삭제 완료 (secure=false, sameSite=Lax)");
     }
     
 
