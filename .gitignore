@@ -42,3 +42,4 @@ out/
 
 .md.env
 *.env
+!docker/*.yml
