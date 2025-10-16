@@ -20,6 +20,10 @@ public class OptionValueResponseDto {
         this.addPrice = optionValue.getAddPrice();
     }
 
+    public static OptionValueResponseDto from(OptionValue optionValue) {
+        return new OptionValueResponseDto(optionValue);
+    }
+
     public static List<OptionValueResponseDto> findAllOptionValues(List<OptionValue>  optionValues) {
         return optionValues.stream().map(OptionValueResponseDto::new)
                 .toList();

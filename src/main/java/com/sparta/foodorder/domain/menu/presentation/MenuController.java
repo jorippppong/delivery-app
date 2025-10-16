@@ -6,6 +6,10 @@ import com.sparta.foodorder.domain.menu.application.MenuService;
 import com.sparta.foodorder.domain.menu.presentation.dto.MenuCreateRequestDto;
 import com.sparta.foodorder.domain.menu.presentation.dto.MenuResponseDto;
 import com.sparta.foodorder.domain.menu.presentation.dto.MenuUpdateRequestDto;
+import com.sparta.foodorder.domain.menu.presentation.dto.OptionResponseDto;
+import com.sparta.foodorder.domain.menu.presentation.dto.OptionUpdateRequestDto;
+import com.sparta.foodorder.domain.menu.presentation.dto.OptionValueResponseDto;
+import com.sparta.foodorder.domain.menu.presentation.dto.OptionValueUpdateRequestDto;
 import com.sparta.foodorder.domain.user.domain.UserRole;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -19,6 +23,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -100,4 +105,62 @@ public class MenuController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "옵션 수정", description = "가게 주인이 특정 메뉴에 대한 옵션을 수정합니다.")
+    @PatchMapping("/{menuId}/options/{optionId}")
+    public ResponseEntity<OptionResponseDto> updateOption(
+        @PathVariable UUID menuId,
+        @PathVariable UUID optionId,
+        @RequestBody OptionUpdateRequestDto requestDto,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long userId = userDetails.getUserId();
+        OptionResponseDto responseDto = menuService.updateOption(requestDto, menuId, optionId, userId);
+
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @Operation(summary = "옵션 삭제", description = "가게 주인이 특정 메뉴에 대한 옵션을 삭제합니다.")
+    @DeleteMapping("/{menuId}/options/{optionId}")
+    public ResponseEntity<Void> deleteOption(
+        @PathVariable UUID menuId,
+        @PathVariable UUID optionId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long userId = userDetails.getUserId();
+        String email = userDetails.getUserEmail();
+        menuService.deleteOption(menuId, optionId, userId, email);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "옵션값 수정", description = "가게 주인이 특정 옵션에 대한 옵션값을 수정합니다.")
+    @PatchMapping("/{menuId}/options/{optionId}/value/{valueId}")
+    public ResponseEntity<OptionValueResponseDto> updateOptionValue(
+        @PathVariable UUID menuId,
+        @PathVariable UUID optionId,
+        @PathVariable UUID valueId,
+        @RequestBody OptionValueUpdateRequestDto requestDto,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long userId = userDetails.getUserId();
+        OptionValueResponseDto responseDto =
+            menuService.updateOptionValue(requestDto, menuId, optionId, valueId, userId);
+
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @Operation(summary = "옵션값 삭제", description = "가게 주인이 특정 옵션에 대한 옵션값을 삭제합니다.")
+    @DeleteMapping("/{menuId}/options/{optionId}/value/{valueId}")
+    public ResponseEntity<Void> deleteOptionValue(
+        @PathVariable UUID menuId,
+        @PathVariable UUID optionId,
+        @PathVariable UUID valueId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        Long userId = userDetails.getUserId();
+        String email = userDetails.getUserEmail();
+        menuService.deleteOptionValue(menuId, optionId, valueId, userId, email);
+
+        return ResponseEntity.ok().build();
+    }
 }
