@@ -43,4 +43,19 @@ public class Option extends BaseEntity {
     public static Option create(Menu menu, String name, List<OptionValue> optionValues) {
         return new Option(menu, name, optionValues);
     }
+
+    public void updateOption(String name) {
+        this.name = name;
+    }
+
+    public void delete(String deletedBy) {
+        deleteCascade(deletedBy);
+        this.softDelete(deletedBy);
+    }
+
+    private void deleteCascade(String deletedBy) {
+        for(OptionValue optionValue : this.optionValues) {
+            optionValue.softDelete(deletedBy);
+        }
+    }
 }

@@ -9,19 +9,31 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface StoreJpaRepository extends JpaRepository<Store, UUID> {
-    boolean existsByName(String name);
+    boolean existsByNameAndIsActiveTrue(String name);
 
-    boolean existsByOwnerId(Long ownerId);
+    boolean existsByOwnerIdAndIsActiveTrue(Long ownerId);
 
-    boolean existsByPhoneNumber(String phoneNumber);
+    boolean existsByPhoneNumberAndIsActiveTrue(String phoneNumber);
 
     Optional<Store> findById(UUID id);
+
+    Optional<Store> findByIdAndIsActiveTrue(UUID id);
+
+    Optional<Store> findByIdAndDeletedAtIsNull(UUID id);
 
     boolean existsByIdAndIsActiveTrue(UUID id);
 
     Page<Store> findAllByIsActiveTrue(Pageable pageable);
 
-    Page<Store> findAllByNameContainingAndIsActiveTrue(String q, Pageable pageable);
+    Page<Store> findAllByNameContainingIgnoreCaseAndIsActiveTrue(String q, Pageable pageable);
+
+    Page<Store> findAllByDeletedAtIsNull(Pageable pageable);
+
+    Page<Store> findAllByNameContainingIgnoreCaseAndDeletedAtIsNull(String query, Pageable pageable);
+
+    Page<Store> findAllByIsActiveTrueAndStoreCategories_Category_Id(UUID categoryId, Pageable pageable);
+
+    Page<Store> findAllByDeletedAtIsNullAndStoreCategories_Category_Id(UUID categoryId, Pageable pageable);
 
     Optional<Store> findByOwnerId(Long ownerId);
 

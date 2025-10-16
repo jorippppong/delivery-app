@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AiRequestDto {
+    private Long userId;
     private String productName;
     private String content;
     private String prompt;

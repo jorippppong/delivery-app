@@ -40,17 +40,17 @@ public interface StoreService {
      * 가게목록 조회 메서드
      * 검색 키워드 있을 경우, 키워드 검색 결과 가게 목록 조회
      */
-    PagedResponse<StoreResponseDto> getStores(String query, Pageable pageable);
+    PagedResponse<StoreResponseDto> getStores(String query, Pageable pageable, UserRole role);
 
     /**
      * 가게 상세조회 메서드
      */
-    StoreDetailResponseDto getStore(UUID storeId);
+    StoreDetailResponseDto getStore(UUID storeId, UserRole role);
 
     /**
      * 카테고리별 가게 조회 메서드
      */
-    PagedResponse<StoreResponseDto> getStoresByCategory(UUID categoryId, Pageable pageable);
+    PagedResponse<StoreResponseDto> getStoresByCategory(UUID categoryId, Pageable pageable, UserRole role);
 
     Store findByUUID(UUID storeId);
 

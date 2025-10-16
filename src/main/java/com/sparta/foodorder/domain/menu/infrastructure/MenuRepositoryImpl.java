@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import lombok.RequiredArgsConstructor;
 
 
 @RequiredArgsConstructor
@@ -46,13 +47,15 @@ public class MenuRepositoryImpl implements MenuRepository {
 
     @Override
     public List<Menu> findByStoreIdAndActiveTrueAndHiddenFalseAndDeletedAtIsNull(UUID storeId) {
-        return menuJpaRepository.findByStoreIdAndActiveTrueAndHiddenFalseAndDeletedAtIsNull(storeId);
+        return menuJpaRepository.findByStoreIdAndActiveTrueAndHiddenFalseAndDeletedAtIsNull(
+            storeId);
     }
 
     @Override
     public List<Menu> findByStoreIdAndDeletedAtIsNull(UUID storeId) {
         return menuJpaRepository.findByStoreIdAndDeletedAtIsNull(storeId);
     }
+
     public List<Menu> findAllByIds(List<UUID> menuIds) {
         return menuJpaRepository.findAllById(menuIds);
     }
@@ -61,4 +64,7 @@ public class MenuRepositoryImpl implements MenuRepository {
         return menuJpaRepository.findByNameContaining(searchString,pageable);
     }
 
+    public Optional<Menu> findByIdAndDeletedAtIsNull(UUID menuId) {
+        return menuJpaRepository.findByIdAndDeletedAtIsNull(menuId);
+    }
 }

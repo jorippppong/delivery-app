@@ -38,9 +38,11 @@ public class CategoryController {
     @GetMapping("/{categoryId}/stores")
     public ResponseEntity<PagedResponse<StoreResponseDto>> getStoresByCategory(
         @PathVariable UUID categoryId,
-        Pageable pageable
+        Pageable pageable,
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        PagedResponse<StoreResponseDto> stores = storeService.getStoresByCategory(categoryId, pageable);
+        UserRole role = userDetails.getRole();
+        PagedResponse<StoreResponseDto> stores = storeService.getStoresByCategory(categoryId, pageable, role);
         return ResponseEntity.ok(stores);
     }
 

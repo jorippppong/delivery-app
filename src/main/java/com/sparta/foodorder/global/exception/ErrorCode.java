@@ -36,6 +36,11 @@ public enum ErrorCode {
     // 메뉴 관련 에러
     MENU_NOT_FOUND(HttpStatus.NOT_FOUND, "M001", "존재하지 않는 메뉴입니다."),
 
+    // 온셥 관련 에러
+    OPTION_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "MO001", "해당 옵션에 대한 접근권한이 없습니다."),
+    OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "MO002", "존재하지 않는 옵션입니다."),
+    OPTION_VALUE_NOT_FOUND(HttpStatus.NOT_FOUND, "MO003", "존재하지 않는 옵션값입니다."),
+
     // 주문 관련 에러
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "O001", "주문을 찾을 수 없습니다"),
     INVALID_ORDER_STATUS(HttpStatus.BAD_REQUEST, "O002", "잘못된 주문 상태입니다"),
