@@ -1,11 +1,7 @@
 package com.sparta.foodorder.domain.review.domain;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
-import org.hibernate.annotations.GenericGenerator;
-
-import com.sparta.foodorder.global.common.BaseCreateEntity;
 import com.sparta.foodorder.global.common.BaseDeleteEntity;
 
 import jakarta.persistence.Column;

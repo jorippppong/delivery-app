@@ -2,6 +2,8 @@ package com.sparta.foodorder.domain.store.application;
 
 import com.sparta.foodorder.domain.menu.domain.Menu;
 import com.sparta.foodorder.domain.menu.presentation.dto.MenuResponseDto;
+import com.sparta.foodorder.domain.review.application.dto.RatingStats;
+import com.sparta.foodorder.domain.review.domain.ReviewRepository;
 import com.sparta.foodorder.domain.store.application.dto.CategoryResponseDto;
 import com.sparta.foodorder.domain.store.application.dto.StoreCreateRequestDto;
 import com.sparta.foodorder.domain.store.application.dto.StoreDetailResponseDto;
@@ -185,7 +187,7 @@ public class StoreServiceImpl implements StoreService {
         Store store = storeRepository.findByIdAndIsActiveTrue(storeId)
             .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
         RatingStats stats = reviewRepository.calculateRatingStats(storeId);
-        store.updateRating(stats.getCount(), stats.getAverage());
+        store.updateRating(stats.count(), stats.average());
         return storeRepository.save(store);
     }
 

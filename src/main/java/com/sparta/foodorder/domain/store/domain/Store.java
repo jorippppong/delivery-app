@@ -58,7 +58,7 @@ public class Store extends BaseEntity {
     private Long ratingCount;
 
     @Column(name = "rating_avg")
-    private Float ratingAvg;
+    private Double ratingAvg;
 
     @Column(name = "min_order_amount", nullable = false)
     private Long minOrderAmount;
@@ -145,7 +145,7 @@ public class Store extends BaseEntity {
         this.isActive = false;
     }
 
-    public void updateRating(Long ratingCount, Float ratingAvg) {
+    public void updateRating(Long ratingCount, Double ratingAvg) {
         if(ratingCount != null) this.ratingCount = ratingCount;
         if(ratingAvg != null) this.ratingAvg = ratingAvg;
     }
