@@ -72,9 +72,15 @@ public class Menu extends BaseEntity {
     }
 
 
-    public void deleteMenu(String username) {
-        super.softDelete(username);
+    public void deleteMenu (String deletedBy) {
+        deleteCascade(deletedBy);
+        super.softDelete(deletedBy);
     }
 
+    private void deleteCascade(String deletedBy) {
+        for(Option option : this.options) {
+            option.delete(deletedBy);
+        }
+    }
 
 }
