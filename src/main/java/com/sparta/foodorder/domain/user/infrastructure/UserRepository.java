@@ -7,7 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -15,8 +17,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUserEmail(String userEmail);
 
     Optional<User> findByNickName(String nickName);
-    
+
     Optional<User> findByBusinessNumber(String businessNumber);
-    
+
     Page<User> findByStatus(UserStatus status, Pageable pageable);
+
+    List<User> findAllByIdIn(Set<Long> userIds);
 }

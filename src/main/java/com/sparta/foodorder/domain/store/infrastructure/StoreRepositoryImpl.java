@@ -7,7 +7,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -87,7 +89,17 @@ public class StoreRepositoryImpl implements StoreRepository {
     }
 
     @Override
+    public Page<Store> findAllByNameContainingAndIsActiveTrue(String q, Pageable pageable) {
+        return null; // TODO
+    }
+
+    @Override
     public Optional<Store> findByOwnerId(Long ownerId) {
         return jpaRepository.findByOwnerId(ownerId);
+    }
+
+    @Override
+    public List<Store> findAllByIdIn(Set<UUID> storeIds) {
+        return jpaRepository.findAllByIdIn(storeIds);
     }
 }

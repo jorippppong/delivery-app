@@ -2,11 +2,11 @@ package com.sparta.foodorder.domain.menu.infrastructure;
 
 import com.sparta.foodorder.domain.menu.domain.OptionValue;
 import com.sparta.foodorder.domain.menu.domain.OptionValueRepository;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -16,8 +16,8 @@ public class OptionValueRepositoryImpl implements OptionValueRepository {
 
     @Override
     public Optional<OptionValue> findByIdAndOptionIdAndDeletedAtIsNull(
-        UUID optionValueId,
-        UUID optionId
+            UUID optionValueId,
+            UUID optionId
     ) {
         return optionValueJpaRepository.findByIdAndOption_IdAndDeletedAtIsNull(optionValueId, optionId);
     }
@@ -35,5 +35,10 @@ public class OptionValueRepositoryImpl implements OptionValueRepository {
     @Override
     public List<OptionValue> findAllByOptionIdAndDeletedAtIsNull(UUID optionId) {
         return optionValueJpaRepository.findAllByOptionIdAndDeletedAtIsNull(optionId);
+    }
+
+    @Override
+    public Optional<OptionValue> findById(UUID valueId) {
+        return optionValueJpaRepository.findById(valueId);
     }
 }

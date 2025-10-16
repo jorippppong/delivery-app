@@ -19,6 +19,10 @@ public enum OrderStatus {
         this.description = description;
     }
 
+    public boolean isCancelable() {
+        return this == CREATED || this == PENDING;
+    }
+
     public boolean isAcceptable() {
         return this == PENDING;
     }
