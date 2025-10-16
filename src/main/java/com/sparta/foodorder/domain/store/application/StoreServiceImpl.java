@@ -12,6 +12,7 @@ import com.sparta.foodorder.global.exception.BusinessException;
 import com.sparta.foodorder.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,12 +32,15 @@ public class StoreServiceImpl implements StoreService {
     private final ReviewRepository reviewRepository;
     private final CategoryService categoryService;
 
+    private static final Set<Integer> PERMITTED_PAGE_SIZES = Set.of(10, 30, 50);
+    private static final int DEFAULT_PAGE_SIZE = 10;
+
     @Override
     @Transactional
     public StoreResponseDto createStore(
-            StoreCreateRequestDto requestDto,
-            Long userId,
-            UserRole role
+        StoreCreateRequestDto requestDto,
+        Long userId,
+        UserRole role
     ) {
         validateOwnerRole(role);
 
@@ -57,10 +61,10 @@ public class StoreServiceImpl implements StoreService {
         }
 
         Store store = Store.createStore(
-                userId, requestDto.name(), requestDto.description(), requestDto.address(),
-                requestDto.longitude(), requestDto.latitude(), requestDto.phoneNumber(),
-                requestDto.minOrderAmount(), requestDto.deliveryFee(),
-                requestDto.opensAt(), requestDto.closesAt()
+            userId, requestDto.name(), requestDto.description(), requestDto.address(),
+            requestDto.longitude(), requestDto.latitude(), requestDto.phoneNumber(),
+            requestDto.minOrderAmount(), requestDto.deliveryFee(),
+            requestDto.opensAt(), requestDto.closesAt()
         );
         categories.forEach(store::addCategory);
 
@@ -72,10 +76,10 @@ public class StoreServiceImpl implements StoreService {
     @Override
     @Transactional
     public StoreResponseDto updateStore(
-            StoreUpdateRequestDto requestDto,
-            UUID storeId,
-            String email,
-            UserRole role
+        StoreUpdateRequestDto requestDto,
+        UUID storeId,
+        String email,
+        UserRole role
     ) {
         validateOwnerRole(role);
         Store store = getValidStore(storeId, role);
@@ -84,9 +88,9 @@ public class StoreServiceImpl implements StoreService {
         }
 
         store.updateStore(requestDto.name(), requestDto.description(), requestDto.address(),
-                requestDto.longitude(), requestDto.latitude(), requestDto.phoneNumber(),
-                requestDto.isActive(), requestDto.minOrderAmount(), requestDto.deliveryFee(),
-                requestDto.opensAt(), requestDto.closesAt());
+            requestDto.longitude(), requestDto.latitude(), requestDto.phoneNumber(),
+            requestDto.isActive(), requestDto.minOrderAmount(), requestDto.deliveryFee(),
+            requestDto.opensAt(), requestDto.closesAt());
 
         updateCategories(store, requestDto.categories());
 
@@ -108,19 +112,21 @@ public class StoreServiceImpl implements StoreService {
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<StoreResponseDto> getStores(
-            String query, Pageable pageable, UserRole role
+        String query, Pageable pageable, UserRole role
     ) {
+
+        Pageable normalized = normalizedPageable(pageable);
         Page<Store> storePage = switch (role) {
-            case USER -> getStoresForUser(query, pageable);
-            case OWNER, MANAGER, MASTER -> getStoreForNonUser(query, pageable);
+            case USER -> getStoresForUser(query, normalized);
+            case OWNER, MANAGER, MASTER -> getStoreForNonUser(query, normalized);
         };
 
         List<StoreResponseDto> data = storePage.getContent().stream()
-                .map(StoreResponseDto::from)
-                .toList();
+            .map(StoreResponseDto::from)
+            .toList();
 
         return PagedResponse.success(data, storePage.getNumber(), storePage.getSize(),
-                storePage.hasNext());
+            storePage.hasNext());
     }
 
     @Override
@@ -128,7 +134,7 @@ public class StoreServiceImpl implements StoreService {
     public StoreDetailResponseDto getStore(UUID storeId, UserRole role) {
         Store store = getValidStore(storeId, role);
         List<CategoryResponseDto> categoryResponseDtoList = categoryService.getCategoryDtoList(
-                store);
+            store);
         List<MenuResponseDto> menuResponseDtoList = getMenuDtoList(store);
 
         return StoreDetailResponseDto.from(store, categoryResponseDtoList, menuResponseDtoList);
@@ -137,31 +143,33 @@ public class StoreServiceImpl implements StoreService {
     @Override
     @Transactional(readOnly = true)
     public PagedResponse<StoreResponseDto> getStoresByCategory(
-            UUID categoryId, Pageable pageable, UserRole role
+        UUID categoryId, Pageable pageable, UserRole role
     ) {
         if (!categoryRepository.existsById(categoryId)) {
             throw new BusinessException(ErrorCode.CATEGORY_NOT_FOUND);
         }
 
+        Pageable normalized = normalizedPageable(pageable);
         Page<Store> storesByCategory = switch (role) {
             case USER -> storeRepository.findAllByIsActiveTrueAndStoreCategoriesCategoryId(
-                    categoryId, pageable);
-            case OWNER, MANAGER, MASTER -> storeRepository.findAllByDeletedAtIsNullAndStoreCategoriesCategoryId(
-                    categoryId, pageable);
+                categoryId, normalized);
+            case OWNER, MANAGER, MASTER ->
+                storeRepository.findAllByDeletedAtIsNullAndStoreCategoriesCategoryId(
+                    categoryId, normalized);
         };
 
         List<StoreResponseDto> data = storesByCategory.getContent().stream()
-                .map(StoreResponseDto::from).toList();
+            .map(StoreResponseDto::from).toList();
 
         return PagedResponse.success(data, storesByCategory.getNumber(), storesByCategory.getSize(),
-                storesByCategory.hasNext());
+            storesByCategory.hasNext());
     }
 
     @Override
     public Store findByUUID(UUID storeId) {
         return storeRepository.findById(storeId)
-                .filter(s -> !s.isDeleted())
-                .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
+            .filter(s -> !s.isDeleted())
+            .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
     }
 
     @Override
@@ -175,7 +183,7 @@ public class StoreServiceImpl implements StoreService {
     @Transactional
     public Store updateRating(UUID storeId) {
         Store store = storeRepository.findByIdAndIsActiveTrue(storeId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
+            .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
         RatingStats stats = reviewRepository.calculateRatingStats(storeId);
         store.updateRating(stats.count(), stats.average());
         return storeRepository.save(store);
@@ -190,7 +198,7 @@ public class StoreServiceImpl implements StoreService {
             store.getStoreCategories().clear();
             categories.forEach(categoryId -> {
                 Category category = categoryRepository.findById(categoryId)
-                        .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
+                    .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
 
                 store.addCategory(category);
             });
@@ -200,11 +208,11 @@ public class StoreServiceImpl implements StoreService {
     private Store getValidStore(UUID storeId, UserRole role) {
         if (role == UserRole.USER) {
             return storeRepository.findByIdAndIsActiveTrue(storeId)
-                    .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
         }
 
         return storeRepository.findByIdAndDeletedAtIsNull(storeId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
+            .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
     }
 
     private void validateOwnerRole(UserRole role) {
@@ -235,5 +243,12 @@ public class StoreServiceImpl implements StoreService {
             return storeRepository.findAllByDeletedAtIsNull(pageable);
         }
         return storeRepository.findAllByNameContainingIgnoreCaseAndDeletedAtIsNull(query, pageable);
+    }
+
+    private Pageable normalizedPageable(Pageable pageable) {
+        int size = PERMITTED_PAGE_SIZES.contains(
+            pageable.getPageSize()) ? pageable.getPageSize() : DEFAULT_PAGE_SIZE;
+
+        return PageRequest.of(pageable.getPageNumber(), size, pageable.getSort());
     }
 }

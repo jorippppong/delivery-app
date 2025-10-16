@@ -9,12 +9,13 @@ import com.sparta.foodorder.domain.store.domain.CategoryService;
 import com.sparta.foodorder.domain.store.domain.StoreService;
 import com.sparta.foodorder.domain.user.domain.UserRole;
 import com.sparta.foodorder.global.dto.PagedResponse;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,28 +26,28 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-@Tag(name = "카테고리", description = "카테고리 관련 API")
 @RestController
 @RequestMapping("/v1/categories")
 @RequiredArgsConstructor
-public class CategoryController {
+public class CategoryController implements CategoryApiDocs {
 
     private final StoreService storeService;
     private final CategoryService categoryService;
 
-    @Operation(summary = "카테고리별 가게 조회", description = "카테고리별 가게를 조회합니다.")
     @GetMapping("/{categoryId}/stores")
     public ResponseEntity<PagedResponse<StoreResponseDto>> getStoresByCategory(
         @PathVariable UUID categoryId,
+        @PageableDefault(size = 10)
+        @SortDefault(sort = "createdAt", direction = Direction.DESC)
         Pageable pageable,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         UserRole role = userDetails.getRole();
-        PagedResponse<StoreResponseDto> stores = storeService.getStoresByCategory(categoryId, pageable, role);
+        PagedResponse<StoreResponseDto> stores = storeService.getStoresByCategory(categoryId,
+            pageable, role);
         return ResponseEntity.ok(stores);
     }
 
-    @Operation(summary = "카테고리 생성", description = "관리자는 카테고리를 생성합니다.")
     @PostMapping
     public ResponseEntity<CategoryResponseDto> createCategory(
         @Valid @RequestBody CategoryCreateRequestDto requestDto,
@@ -58,7 +59,6 @@ public class CategoryController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "카테고리 수정", description = "관리자는 카테고리명을 수정합니다.")
     @PatchMapping("{categoryId}")
     public ResponseEntity<CategoryResponseDto> updateCategory(
         @PathVariable UUID categoryId,
