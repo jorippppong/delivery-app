@@ -7,13 +7,13 @@ import com.sparta.foodorder.domain.menu.domain.Menu;
 import com.sparta.foodorder.domain.menu.domain.Option;
 import com.sparta.foodorder.domain.menu.domain.OptionValue;
 import com.sparta.foodorder.domain.order.domain.*;
+import com.sparta.foodorder.domain.order.event.OrderEvent;
 import com.sparta.foodorder.domain.order.presentation.dto.CreateOrderRequestDto;
 import com.sparta.foodorder.domain.order.presentation.dto.GetOrderResponseDto;
 import com.sparta.foodorder.domain.order.presentation.dto.GetStoreOrdersResponseDto;
 import com.sparta.foodorder.domain.order.presentation.dto.GetUserOrdersResponseDto;
 import com.sparta.foodorder.domain.payment.domain.Payment;
 import com.sparta.foodorder.domain.payment.domain.PaymentService;
-import com.sparta.foodorder.domain.payment.event.PaymentEvent;
 import com.sparta.foodorder.domain.store.domain.Store;
 import com.sparta.foodorder.domain.store.domain.StoreService;
 import com.sparta.foodorder.domain.user.domain.User;
@@ -29,6 +29,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -52,6 +53,7 @@ public class OrderService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
     }
 
+    @Transactional
     public UUID createOrder(CreateOrderRequestDto dto, Long userId) {
         storeService.validateExistenceById(dto.storeId());
         List<Menu> menus = menuService.findAllById(dto.getMenuIds());
@@ -99,6 +101,7 @@ public class OrderService {
         return orderId;
     }
 
+    @Transactional
     public void cancelOrder(UUID orderId, Long userId) {
         Order order = getOrder(orderId);
         order.validateOrderWriter(userId);
@@ -108,7 +111,7 @@ public class OrderService {
         Optional<Payment> optionalPayment = paymentService.findByOrderId(orderId);
         if (optionalPayment.isPresent()) {
             Payment payment = optionalPayment.get();
-            PaymentEvent.PaymentRefunded refunded = new PaymentEvent.PaymentRefunded(
+            OrderEvent.PaymentRefunded refunded = new OrderEvent.PaymentRefunded(
                     orderId,
                     payment.getId(),
                     "사용자 주문 취소"
@@ -118,6 +121,7 @@ public class OrderService {
         }
     }
 
+    @Transactional
     public void acceptOrder(UUID orderId, Long userId) {
         Order order = getOrder(orderId);
         Store store = storeService.findByUUID(order.getStoreId());
@@ -125,6 +129,7 @@ public class OrderService {
         order.accept();
     }
 
+    @Transactional
     public void rejectOrder(UUID orderId, Long userId) {
         Order order = getOrder(orderId);
         Store store = storeService.findByUUID(order.getStoreId());
@@ -132,6 +137,7 @@ public class OrderService {
         order.reject();
     }
 
+    @Transactional
     public void readyOrder(UUID orderId, Long userId) {
         Order order = getOrder(orderId);
         Store store = storeService.findByUUID(order.getStoreId());
@@ -139,6 +145,7 @@ public class OrderService {
         order.ready();
     }
 
+    @Transactional
     public void deliverOrder(UUID orderId, Long userId) {
         Order order = getOrder(orderId);
         Store store = storeService.findByUUID(order.getStoreId());
@@ -146,6 +153,7 @@ public class OrderService {
         order.deliver();
     }
 
+    @Transactional
     public void completeOrder(UUID orderId, Long userId) {
         Order order = getOrder(orderId);
         order.validateOrderWriter(userId);
