@@ -58,7 +58,7 @@ public class Store extends BaseEntity {
     private Long ratingCount;
 
     @Column(name = "rating_avg")
-    private Float ratingAvg;
+    private Double ratingAvg;
 
     @Column(name = "min_order_amount", nullable = false)
     private Long minOrderAmount;
