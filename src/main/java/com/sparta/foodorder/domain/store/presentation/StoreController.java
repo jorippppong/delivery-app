@@ -11,6 +11,9 @@ import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -67,6 +70,8 @@ public class StoreController {
     @GetMapping
     public ResponseEntity<PagedResponse<StoreResponseDto>> getStores(
         @RequestParam(name = "q", required = false) String query,
+        @PageableDefault(size = 10)
+        @SortDefault(sort = "createdAt", direction = Direction.DESC)
         Pageable pageable,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
