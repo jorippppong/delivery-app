@@ -134,7 +134,7 @@ public class MenuController {
     }
 
     @Operation(summary = "옵션값 수정", description = "가게 주인이 특정 옵션에 대한 옵션값을 수정합니다.")
-    @PatchMapping("/{menuId}/options/{optionId}/value/{valueId}")
+    @PatchMapping("/{menuId}/options/{optionId}/values/{valueId}")
     public ResponseEntity<OptionValueResponseDto> updateOptionValue(
         @PathVariable UUID menuId,
         @PathVariable UUID optionId,
@@ -150,7 +150,7 @@ public class MenuController {
     }
 
     @Operation(summary = "옵션값 삭제", description = "가게 주인이 특정 옵션에 대한 옵션값을 삭제합니다.")
-    @DeleteMapping("/{menuId}/options/{optionId}/value/{valueId}")
+    @DeleteMapping("/{menuId}/options/{optionId}/values/{valueId}")
     public ResponseEntity<Void> deleteOptionValue(
         @PathVariable UUID menuId,
         @PathVariable UUID optionId,
