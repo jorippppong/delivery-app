@@ -18,7 +18,7 @@ public record StoreResponseDto(
     String phoneNumber,
     Boolean isActive,
     Long ratingCount,
-    Float ratingAvg,
+    Double ratingAvg,
     Long deliveryFee,
     Long minOrderAmount,
     LocalTime opensAt,
