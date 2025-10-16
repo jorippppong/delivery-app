@@ -34,6 +34,7 @@ public class StoreServiceImpl implements StoreService {
 
     private final StoreRepository storeRepository;
     private final CategoryRepository categoryRepository;
+    private final ReviewRepository reviewRepository;
     private final CategoryService categoryService;
 
     @Override
@@ -176,6 +177,16 @@ public class StoreServiceImpl implements StoreService {
         if (!storeRepository.existsByIdAndIsActiveTrue(storeId)) {
             throw new BusinessException(ErrorCode.STORE_NOT_FOUND);
         }
+    }
+
+    @Override
+    @Transactional
+    public Store updateRating(UUID storeId) {
+        Store store = storeRepository.findByIdAndIsActiveTrue(storeId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
+        RatingStats stats = reviewRepository.calculateRatingStats(storeId);
+        store.updateRating(stats.getCount(), stats.getAverage());
+        return storeRepository.save(store);
     }
 
     private void updateCategories(Store store, Set<UUID> categories) {

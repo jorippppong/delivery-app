@@ -56,4 +56,5 @@ public interface StoreService {
 
     void validateExistenceById(UUID storeId);
 
+    Store updateRating(UUID storeId);
 }

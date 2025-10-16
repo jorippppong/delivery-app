@@ -144,4 +144,9 @@ public class Store extends BaseEntity {
         super.softDelete(email);
         this.isActive = false;
     }
+
+    public void updateRating(Long ratingCount, Float ratingAvg) {
+        if(ratingCount != null) this.ratingCount = ratingCount;
+        if(ratingAvg != null) this.ratingAvg = ratingAvg;
+    }
 }
