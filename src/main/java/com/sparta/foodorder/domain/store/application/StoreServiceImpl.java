@@ -37,6 +37,7 @@ public class StoreServiceImpl implements StoreService {
     private final StoreRepository storeRepository;
     private final CategoryRepository categoryRepository;
     private final StoreCategoryRepository storeCategoryRepository;
+    private final ReviewRepository reviewRepository;
     private final CategoryService categoryService;
 
     @Override
@@ -180,12 +181,12 @@ public class StoreServiceImpl implements StoreService {
 
     @Override
     @Transactional
-    public Store updateRating(UUID storeId, Long ratingCount, Float ratingAvg) {
+    public Store updateRating(UUID storeId) {
         Store store = storeRepository.findByIdAndIsActiveTrue(storeId)
             .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
-        store.updateRating(ratingCount, ratingAvg);
-        
-        return store;
+        RatingStats stats = reviewRepository.calculateRatingStats(storeId);
+        store.updateRating(stats.getCount(), stats.getAverage());
+        return storeRepository.save(store);
     }
 
     private void updateCategories(Store store, Set<UUID> categories) {
