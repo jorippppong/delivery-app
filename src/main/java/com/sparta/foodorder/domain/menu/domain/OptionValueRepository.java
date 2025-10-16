@@ -6,10 +6,9 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-@Repository
-public interface OptionValueRepository extends JpaRepository<OptionValue, UUID> {
+public interface OptionValueRepository {
 
-    Optional<OptionValue> findByIdAndOption_IdAndDeletedAtIsNull(UUID optionValueId, UUID optionId);
+    Optional<OptionValue> findByIdAndOptionIdAndDeletedAtIsNull(UUID optionValueId, UUID optionId);
 
     OptionValue save(OptionValue optionValue);
   

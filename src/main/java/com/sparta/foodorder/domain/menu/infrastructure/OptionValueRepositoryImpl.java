@@ -2,6 +2,7 @@ package com.sparta.foodorder.domain.menu.infrastructure;
 
 import com.sparta.foodorder.domain.menu.domain.OptionValue;
 import com.sparta.foodorder.domain.menu.domain.OptionValueRepository;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -12,6 +13,14 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OptionValueRepositoryImpl implements OptionValueRepository {
     private final OptionValueJpaRepository optionValueJpaRepository;
+
+    @Override
+    public Optional<OptionValue> findByIdAndOptionIdAndDeletedAtIsNull(
+        UUID optionValueId,
+        UUID optionId
+    ) {
+        return optionValueJpaRepository.findByIdAndOption_IdAndDeletedAtIsNull(optionValueId, optionId);
+    }
 
     @Override
     public OptionValue save(OptionValue optionValue) {
