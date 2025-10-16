@@ -20,6 +20,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
@@ -39,9 +40,15 @@ public class AuthServiceImpl implements AuthService {
     private final TokenBlacklistService tokenBlacklistService;
     private final RefreshTokenService refreshTokenService;
     
+    @Value("${cookie.secure}")
+    private boolean cookieSecure;
+    
+    @Value("${cookie.same-site}")
+    private String cookieSameSite;
+    
     @Override
     @Transactional
-    public LoginResponseDto login(LoginRequestDto requestDto) {
+    public LoginResponseDto login(LoginRequestDto requestDto, HttpServletResponse response) {
         log.info("로그인 시도: {}", requestDto.getUserEmail());
         
         User user = userRepository.findByUserEmail(requestDto.getUserEmail())
@@ -64,6 +71,9 @@ public class AuthServiceImpl implements AuthService {
         // Refresh Token을 Redis에 저장 (Token Rotation 지원)
         long refreshTokenExpiration = JwtTokenizer.REFRESH_TOKEN_EXPIRE_COUNT / 1000; // 밀리초 → 초
         refreshTokenService.saveRefreshToken(user.getUserEmail(), refreshToken, refreshTokenExpiration);
+        
+        // 쿠키 설정
+        setCookies(response, accessToken, refreshToken);
         
         log.info("로그인 성공: {}", requestDto.getUserEmail());
         return new LoginResponseDto(accessToken, refreshToken, user.getUserEmail(), user.getRole().name());
@@ -131,7 +141,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public LoginResponseDto refresh(String token) {
+    public LoginResponseDto refresh(String token, HttpServletResponse response) {
         log.info("토큰 갱신 요청");
         String refreshToken = token.replace("Bearer ", "");
         
@@ -182,6 +192,9 @@ public class AuthServiceImpl implements AuthService {
             // 새로운 Refresh Token을 Redis에 저장
             refreshTokenService.saveRefreshToken(userEmail, newRefreshToken, refreshExpiration);
             
+            // 쿠키 설정
+            setCookies(response, newAccessToken, newRefreshToken);
+            
             log.info("토큰 갱신 성공 (Token Rotation 적용): {}", userEmail);
             return new LoginResponseDto(newAccessToken, newRefreshToken, user.getUserEmail(), user.getRole().name());
             
@@ -215,28 +228,57 @@ public class AuthServiceImpl implements AuthService {
     }
     
 
-    private void clearCookies(HttpServletResponse response) {
+    /**
+     * 로그인/토큰갱신 시 쿠키 설정
+     */
+    private void setCookies(HttpServletResponse response, String accessToken, String refreshToken) {
+        // Access Token 쿠키 설정
+        ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", accessToken)
+                .path("/")
+                .httpOnly(true)
+                .secure(cookieSecure) // 환경별 설정
+                .sameSite(cookieSameSite) // 환경별 설정
+                .maxAge(JwtTokenizer.ACCESS_TOKEN_EXPIRE_COUNT / 1000) // 초 단위
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+        
+        // Refresh Token 쿠키 설정
+        ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", refreshToken)
+                .path("/")
+                .httpOnly(true)
+                .secure(cookieSecure) // 환경별 설정
+                .sameSite(cookieSameSite) // 환경별 설정
+                .maxAge(JwtTokenizer.REFRESH_TOKEN_EXPIRE_COUNT / 1000) // 초 단위
+                .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+        
+        log.info("쿠키 설정 완료 (secure={}, sameSite={})", cookieSecure, cookieSameSite);
+    }
 
+    /**
+     * 로그아웃 시 쿠키 삭제
+     */
+    private void clearCookies(HttpServletResponse response) {
+        // 쿠키 삭제 시 생성할 때와 동일한 설정 사용
         ResponseCookie accessTokenCookie = ResponseCookie.from("accessToken", "")
                 .path("/")
-                .sameSite("Strict")
-                .secure(true)
+                .sameSite(cookieSameSite)  // 생성 시와 동일
+                .secure(cookieSecure)      // 생성 시와 동일
                 .httpOnly(true)
                 .maxAge(0)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
         
-
         ResponseCookie refreshTokenCookie = ResponseCookie.from("refreshToken", "")
                 .path("/")
-                .sameSite("Strict")
-                .secure(true)
+                .sameSite(cookieSameSite)  // 생성 시와 동일
+                .secure(cookieSecure)      // 생성 시와 동일
                 .httpOnly(true)
                 .maxAge(0)
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
         
-        log.info("쿠키 삭제 완료");
+        log.info("쿠키 삭제 완료 (secure={}, sameSite={})", cookieSecure, cookieSameSite);
     }
     
 

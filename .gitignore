@@ -40,4 +40,5 @@ out/
 *.yml
 !docker-compose.yml
 
-.md
+.md.env
+*.env

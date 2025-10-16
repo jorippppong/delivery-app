@@ -1,0 +1,82 @@
+### 사용자 관련 API 테스트
+### 기본 설정
+@baseUrl = http://localhost:8080
+@contentType = application/json
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+### 인증이 필요한 API들
+### 1. 내 정보 조회
+GET {{baseUrl}}/v1/users/me
+Authorization: Bearer {{accessToken}}
+
+### 2. 프로필 수정
+PUT {{baseUrl}}/v1/users/me
+Authorization: Bearer {{accessToken}}
+Content-Type: {{contentType}}
+
+{
+  "name": "홍길동수정",
+  "phone": "010-9999-8888",
+  "nickname": "홍길동수정"
+}
+
+### 3. 비밀번호 변경
+PUT {{baseUrl}}/v1/users/me/password
+Authorization: Bearer {{accessToken}}
+Content-Type: {{contentType}}
+
+{
+  "currentPassword": "password123!",
+  "newPassword": "newpassword123!",
+  "confirmPassword": "newpassword123!"
+}
+
+### 4. 회원 탈퇴
+DELETE {{baseUrl}}/v1/users/me
+Authorization: Bearer {{accessToken}}
+
+### 관리자 전용 API (MASTER 권한 필요)
+### 5. 승인 대기 사용자 목록 조회
+GET {{baseUrl}}/v1/users/pending?page=0&size=20
+Authorization: Bearer {{accessToken}}
+
+### 6. 사용자 승인/거부
+POST {{baseUrl}}/v1/users/1/approval
+Authorization: Bearer {{accessToken}}
+Content-Type: {{contentType}}
+
+{
+  "approved": true,
+  "reason": "승인 완료"
+}
+
+### 관리자 전용 API (MASTER, MANAGER 권한 필요)
+### 7. 모든 사용자 목록 조회
+GET {{baseUrl}}/v1/admin/users?page=0&size=20&sort=createdAt,desc
+Authorization: Bearer {{accessToken}}
+
+### 8. 특정 사용자 상세 조회
+GET {{baseUrl}}/v1/admin/users/1
+Authorization: Bearer {{accessToken}}
+
+### 9. 사용자 상태 변경 (MASTER만 가능)
+PATCH {{baseUrl}}/v1/admin/users/1/status
+Authorization: Bearer {{accessToken}}
+Content-Type: {{contentType}}
+
+{
+  "status": "BANNED",
+  "reason": "부적절한 행동"
+}
+
+### 10. 사용자 강제 탈퇴 (MASTER만 가능)
+DELETE {{baseUrl}}/v1/admin/users/1
+Authorization: Bearer {{accessToken}}
+
+### 11. 제재된 사용자 목록 조회
+GET {{baseUrl}}/v1/admin/users/banned?page=0&size=20
+Authorization: Bearer {{accessToken}}
+
+### 12. 탈퇴한 사용자 목록 조회
+GET {{baseUrl}}/v1/admin/users/withdrawn?page=0&size=20
+Authorization: Bearer {{accessToken}}

@@ -1,0 +1,211 @@
+### 인증 관련 API 테스트
+### 기본 설정
+@baseUrl = http://localhost:8080
+@contentType = application/json
+
+### ===========================================
+### 회원가입 테스트
+### ===========================================
+
+### 1. 일반 사용자 회원가입 (성공 케이스)
+POST {{baseUrl}}/v1/users
+Content-Type: {{contentType}}
+
+{
+  "name": "테스트유저",
+  "nickName": "테스트유저",
+  "userEmail": "testuser@delivery.com",
+  "password": "Test123!@#",
+  "userPhone": "010-1234-5678"
+}
+
+### 2. 일반 사용자 회원가입 (중복 이메일)
+POST {{baseUrl}}/v1/users
+Content-Type: {{contentType}}
+
+{
+  "name": "중복유저",
+  "nickName": "중복유저",
+  "userEmail": "testuser@delivery.com",
+  "password": "Test123!@#",
+  "userPhone": "010-9999-9999"
+}
+
+### 3. 일반 사용자 회원가입 (잘못된 비밀번호 형식)
+POST {{baseUrl}}/v1/users
+Content-Type: {{contentType}}
+
+{
+  "name": "잘못된유저",
+  "nickName": "잘못된유저",
+  "userEmail": "invalid@delivery.com",
+  "password": "123",
+  "userPhone": "010-1111-2222"
+}
+
+### 4. 오너 회원가입
+POST {{baseUrl}}/v1/users/owner
+Content-Type: {{contentType}}
+
+{
+  "name": "김사장",
+  "nickName": "김사장",
+  "userEmail": "owner@delivery.com",
+  "password": "Owner123!@#",
+  "userPhone": "010-9876-5432",
+  "businessNumber": "123-45-67890"
+}
+
+### 5. 매니저 회원가입
+POST {{baseUrl}}/v1/users/manager
+Content-Type: {{contentType}}
+
+{
+  "name": "이매니저",
+  "nickName": "이매니저",
+  "userEmail": "manager@delivery.com",
+  "password": "Manager123!@#",
+  "userPhone": "010-5555-6666",
+  "requestReason": "매니저 권한 신청합니다"
+}
+
+### 6. 마스터 회원가입
+POST {{baseUrl}}/v1/users/master
+Content-Type: {{contentType}}
+
+{
+  "name": "최마스터",
+  "nickName": "최마스터",
+  "userEmail": "master@delivery.com",
+  "password": "Master123!@#",
+  "userPhone": "010-7777-8888",
+  "requestReason": "마스터 권한 신청합니다"
+}
+
+### ===========================================
+### 로그인 테스트
+### ===========================================
+
+### 7. 일반 사용자 로그인 (성공)
+POST {{baseUrl}}/v1/auth/login
+Content-Type: {{contentType}}
+
+{
+  "userEmail": "testuser@delivery.com",
+  "password": "Test123!@#"
+}
+
+### 8. 오너 로그인 (성공)
+POST {{baseUrl}}/v1/auth/login
+Content-Type: {{contentType}}
+
+{
+  "userEmail": "owner@delivery.com",
+  "password": "Owner123!@#"
+}
+
+### 9. 매니저 로그인 (성공)
+POST {{baseUrl}}/v1/auth/login
+Content-Type: {{contentType}}
+
+{
+  "userEmail": "manager@delivery.com",
+  "password": "Manager123!@#"
+}
+
+### 10. 마스터 로그인 (성공)
+POST {{baseUrl}}/v1/auth/login
+Content-Type: {{contentType}}
+
+{
+  "userEmail": "master@delivery.com",
+  "password": "Master123!@#"
+}
+
+### 11. 로그인 실패 (잘못된 비밀번호)
+POST {{baseUrl}}/v1/auth/login
+Content-Type: {{contentType}}
+
+{
+  "userEmail": "testuser@delivery.com",
+  "password": "wrongpassword"
+}
+
+### 12. 로그인 실패 (존재하지 않는 이메일)
+POST {{baseUrl}}/v1/auth/login
+Content-Type: {{contentType}}
+
+{
+  "userEmail": "nonexistent@delivery.com",
+  "password": "Test123!@#"
+}
+
+### 13. 로그인 실패 (빈 값)
+POST {{baseUrl}}/v1/auth/login
+Content-Type: {{contentType}}
+
+{
+  "userEmail": "",
+  "password": ""
+}
+
+### ===========================================
+### 토큰 갱신 테스트
+### ===========================================
+
+### 14. 토큰 갱신 (성공) - 위에서 로그인한 refreshToken 사용
+POST {{baseUrl}}/v1/auth/refresh
+Authorization: Bearer {{refreshToken}}
+
+### 15. 토큰 갱신 실패 (잘못된 토큰)
+POST {{baseUrl}}/v1/auth/refresh
+Authorization: Bearer invalid_token_here
+
+### 16. 토큰 갱신 실패 (토큰 없음)
+POST {{baseUrl}}/v1/auth/refresh
+
+### ===========================================
+### 로그아웃 테스트
+### ===========================================
+
+### 17. 로그아웃 (성공)
+DELETE {{baseUrl}}/v1/auth/logout
+Authorization: Bearer {{accessToken}}
+
+### 18. 로그아웃 실패 (토큰 없음)
+DELETE {{baseUrl}}/v1/auth/logout
+
+### 19. 로그아웃 실패 (잘못된 토큰)
+DELETE {{baseUrl}}/v1/auth/logout
+Authorization: Bearer invalid_token_here
+
+### ===========================================
+### 변수 설정 (로그인 후 받은 토큰으로 업데이트)
+### ===========================================
+
+### 로그인 후 받은 토큰들을 여기에 복사해서 붙여넣으세요
+@accessToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlckBkZWxpdmVyeS5jb20iLCJpYXQiOjE3MzQ5NjQ4MDAsImV4cCI6MTczNDk2ODQwMH0.example_access_token
+@refreshToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0dXNlckBkZWxpdmVyeS5jb20iLCJpYXQiOjE3MzQ5NjQ4MDAsImV4cCI6MTczNDk3MjAwMH0.example_refresh_token
+
+### ===========================================
+### 테스트 시나리오 가이드
+### ===========================================
+
+### 1. 회원가입 테스트 순서:
+###    - 먼저 일반 사용자 회원가입 (7번) 실행
+###    - 성공하면 중복 이메일 테스트 (2번) 실행
+###    - 잘못된 비밀번호 형식 테스트 (3번) 실행
+
+### 2. 로그인 테스트 순서:
+###    - 일반 사용자 로그인 (7번) 실행
+###    - 응답에서 accessToken과 refreshToken 복사
+###    - 위의 변수 설정 부분에 토큰 붙여넣기
+###    - 다른 역할별 로그인 테스트들 실행
+
+### 3. 토큰 갱신 테스트:
+###    - 토큰 갱신 (14번) 실행하여 새로운 토큰 받기
+###    - 잘못된 토큰으로 테스트 (15번, 16번) 실행
+
+### 4. 로그아웃 테스트:
+###    - 로그아웃 (17번) 실행
+###    - 토큰 없이 로그아웃 시도 (18번, 19번) 실행
