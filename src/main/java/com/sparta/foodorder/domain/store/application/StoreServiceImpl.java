@@ -32,7 +32,7 @@ public class StoreServiceImpl implements StoreService {
     private final ReviewRepository reviewRepository;
     private final CategoryService categoryService;
 
-    private static final Set<Integer> PERMITTED_PAGE_SIZES = Set.of(10, 20, 30);
+    private static final Set<Integer> PERMITTED_PAGE_SIZES = Set.of(10, 30, 50);
     private static final int DEFAULT_PAGE_SIZE = 10;
 
     @Override
