@@ -178,6 +178,16 @@ public class StoreServiceImpl implements StoreService {
         }
     }
 
+    @Override
+    @Transactional
+    public Store updateRating(UUID storeId, Long ratingCount, Float ratingAvg) {
+        Store store = storeRepository.findByIdAndIsActiveTrue(storeId)
+            .orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
+        store.updateRating(ratingCount, ratingAvg);
+        
+        return store;
+    }
+
     private void updateCategories(Store store, Set<UUID> categories) {
         if (categories != null && !categories.isEmpty()) {
             store.getStoreCategories().clear();

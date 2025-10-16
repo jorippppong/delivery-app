@@ -55,4 +55,9 @@ public class StoreRepositoryImpl implements StoreRepository {
     public Page<Store> findAllByNameContainingAndIsActiveTrue(String q, Pageable pageable) {
         return jpaRepository.findAllByNameContainingAndIsActiveTrue(q, pageable);
     }
+
+    @Override
+    public Optional<Store> findByIdAndIsActiveTrue(UUID id) {
+        return jpaRepository.findByIdAndIsActiveTrue(id);
+    }
 }
