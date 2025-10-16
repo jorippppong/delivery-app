@@ -38,6 +38,6 @@ out/
 
 ### yml ###
 *.yml
-!docker-compose.yml
+!docker/docker-compose.yml
 
 .md

@@ -2,6 +2,13 @@
 
 팀 이름 : **9글링 개발팀**
 
+프로젝트 명 : 음식 주문 서비스
+
+소개
+
+- 한 줄 정리 : 음식점들의 배달 주문을 쉽고 빠르게 관리하는 플랫폼
+- 내용 : 사용자는 음식점을 검색하고 메뉴를 선택하여 주문할 수 있으며, 음식점은 주문 내역과 결제 상태를 확인할 수 있습니다.
+
 ## 1.1. 팀원 역할 분담
 
 도상원
@@ -57,7 +64,18 @@
 
 ## 2.3. 실행 방법
 
+#### 배포 서버 사용하기
+
 [🔗 배포서버 링크](https://www.erdcloud.com/d/JHFDM8y4GuoN9zpaE)
+
+#### docker-compose 로 실행하는 방법
+
+1. 프로젝트 압축 해제
+2. `cd docker`
+3. `docker compose -f docker-compose.local.yml up -d`
+4. `cd ..`
+5. `./gradlew clean build`
+6. `java -jar build/libs/foodorder-0.0.1-SNAPSHOT.jar`
 
 ## 2.4. 버전 관리 규칙
 
