@@ -16,9 +16,10 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/v1")
 @RequiredArgsConstructor
-public class OrderController {
+public class OrderController implements OrderApiDocs {
     private final OrderService orderService;
 
+    @Override
     @PostMapping("/orders")
     @PreAuthorize("hasAnyRole('USER', 'MASTER', 'MANAGER')")
     public ResponseEntity<CreateOrderResponseDto> createOrder(
@@ -30,6 +31,8 @@ public class OrderController {
         return ResponseEntity.ok(new CreateOrderResponseDto(orderId));
     }
 
+
+    @Override
     @PostMapping("/orders/{orderId}/cancel")
     @PreAuthorize("hasAnyRole('USER', 'MASTER', 'MANAGER')")
     public ResponseEntity<Void> cancelOrder(
@@ -41,6 +44,8 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
+
+    @Override
     @PostMapping("/orders/{orderId}/accept")
     @PreAuthorize("hasAnyRole('OWNER', 'MASTER', 'MANAGER')")
     public ResponseEntity<Void> acceptOrder(
@@ -52,6 +57,8 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
+
+    @Override
     @PostMapping("/orders/{orderId}/reject")
     @PreAuthorize("hasAnyRole('OWNER', 'MASTER', 'MANAGER')")
     public ResponseEntity<Void> rejectOrder(
@@ -63,6 +70,8 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
+
+    @Override
     @PostMapping("/orders/{orderId}/ready")
     @PreAuthorize("hasAnyRole('OWNER', 'MASTER', 'MANAGER')")
     public ResponseEntity<Void> readyOrder(
@@ -74,6 +83,8 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
+
+    @Override
     @PostMapping("/orders/{orderId}/deliver")
     @PreAuthorize("hasAnyRole('OWNER', 'MASTER', 'MANAGER')")
     public ResponseEntity<Void> deliverOrder(
@@ -85,6 +96,7 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
+    @Override
     @PostMapping("/orders/{orderId}/complete")
     @PreAuthorize("hasAnyRole('USER', 'MASTER', 'MANAGER')")
     public ResponseEntity<Void> completeOrder(
@@ -96,6 +108,8 @@ public class OrderController {
         return ResponseEntity.ok().build();
     }
 
+
+    @Override
     @GetMapping("/users/orders")
     @PreAuthorize("hasAnyRole('USER', 'MASTER', 'MANAGER')")
     public ResponseEntity<PagedResponse<GetUserOrdersResponseDto>> getUserOrders(
@@ -108,6 +122,7 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+    @Override
     @GetMapping("/stores/{storeId}/orders")
     @PreAuthorize("hasAnyRole('OWNER', 'MASTER', 'MANAGER')")
     public ResponseEntity<PagedResponse<GetStoreOrdersResponseDto>> getStoreOrders(
@@ -121,6 +136,8 @@ public class OrderController {
         return ResponseEntity.ok(response);
     }
 
+
+    @Override
     @GetMapping("/orders/{orderId}")
     @PreAuthorize("hasAnyRole('USER', 'OWNER', 'MASTER', 'MANAGER')")
     public ResponseEntity<GetOrderResponseDto> getOrder(

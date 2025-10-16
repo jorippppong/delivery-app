@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public class OrderEvent {
 
-    public record PaymentRefunded(
+    public record OrderCanceled(
             UUID orderId,
             UUID paymentId,
             String reason

@@ -3,6 +3,7 @@ package com.sparta.foodorder.domain.payment.application;
 import com.sparta.foodorder.domain.order.domain.Order;
 import com.sparta.foodorder.domain.order.domain.OrderRepository;
 import com.sparta.foodorder.domain.order.domain.OrderStatus;
+import com.sparta.foodorder.domain.order.event.OrderEvent;
 import com.sparta.foodorder.domain.payment.application.dto.PaymentCreateRequestDto;
 import com.sparta.foodorder.domain.payment.application.dto.PaymentRefundRequestDto;
 import com.sparta.foodorder.domain.payment.application.dto.PaymentResponseDto;
@@ -103,7 +104,7 @@ public class PaymentServiceImpl implements PaymentService {
         Payment savedPayment = paymentRepository.save(payment);
 
         eventPublisher.publishEvent(
-                new PaymentEvent.PaymentRefunded(
+                new OrderEvent.OrderCanceled(
                         payment.getOrderId(),
                         savedPayment.getId(),
                         requestDto.failReason()

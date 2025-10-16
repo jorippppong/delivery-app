@@ -111,7 +111,7 @@ public class OrderService {
         Optional<Payment> optionalPayment = paymentService.findByOrderId(orderId);
         if (optionalPayment.isPresent()) {
             Payment payment = optionalPayment.get();
-            OrderEvent.PaymentRefunded refunded = new OrderEvent.PaymentRefunded(
+            OrderEvent.OrderCanceled refunded = new OrderEvent.OrderCanceled(
                     orderId,
                     payment.getId(),
                     "사용자 주문 취소"

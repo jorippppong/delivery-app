@@ -29,7 +29,7 @@ public class OrderPaymentEventListener {
             maxAttempts = 3,
             backoff = @Backoff(delay = 1000, multiplier = 2)
     )
-    public void handlePaymentRefunded(OrderEvent.PaymentRefunded event) {
+    public void handlePaymentRefunded(OrderEvent.OrderCanceled event) {
         log.info("결제 환불 이벤트 수신 - orderId: {}, paymentId: {}, reason: {}",
                 event.orderId(), event.paymentId(), event.reason());
 
