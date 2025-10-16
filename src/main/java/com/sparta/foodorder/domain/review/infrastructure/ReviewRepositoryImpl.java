@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import com.sparta.foodorder.domain.review.application.dto.RatingStats;
 import com.sparta.foodorder.domain.review.application.dto.ReviewWithStoreName;
 import com.sparta.foodorder.domain.review.domain.Review;
 import com.sparta.foodorder.domain.review.domain.ReviewRepository;
@@ -43,5 +44,10 @@ public class ReviewRepositoryImpl implements ReviewRepository {
 	@Override
 	public Page<ReviewWithStoreName> findByUserIdWithStoreName(Long userId, Pageable pageable) {
 		return jpaRepository.findByUserIdWithStoreName(userId, pageable);
+	}
+
+	@Override
+	public RatingStats calculateRatingStats(UUID storeId) {
+		return jpaRepository.calculateRatingStats(storeId);
 	}
 }

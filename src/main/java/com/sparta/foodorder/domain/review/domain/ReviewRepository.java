@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.sparta.foodorder.domain.review.application.dto.RatingStats;
 import com.sparta.foodorder.domain.review.application.dto.ReviewWithStoreName;
 
 public interface ReviewRepository {
@@ -19,4 +20,6 @@ public interface ReviewRepository {
 	Page<Review> findByStoreId(UUID storeId, Pageable pageable);
 
 	Page<ReviewWithStoreName> findByUserIdWithStoreName(Long userId, Pageable pageable);
+
+	RatingStats calculateRatingStats(UUID storeId);
 }

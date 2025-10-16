@@ -16,8 +16,7 @@ import com.sparta.foodorder.domain.review.application.dto.ReviewWithStoreName;
 import com.sparta.foodorder.domain.review.domain.Review;
 import com.sparta.foodorder.domain.review.domain.ReviewRepository;
 import com.sparta.foodorder.domain.review.domain.ReviewService;
-import com.sparta.foodorder.domain.store.domain.Store;
-import com.sparta.foodorder.domain.store.domain.StoreRepository;
+import com.sparta.foodorder.domain.store.domain.StoreService;
 import com.sparta.foodorder.domain.user.domain.UserRole;
 import com.sparta.foodorder.global.dto.PagedResponse;
 import com.sparta.foodorder.global.exception.BusinessException;
@@ -28,12 +27,12 @@ public class ReviewServiceImpl implements ReviewService {
 
 	private final ReviewRepository reviewRepository;
 	private final OrderRepository orderRepository;
-	private final StoreRepository storeRepository;
+	private final StoreService storeService;
 
-	public ReviewServiceImpl(ReviewRepository reviewRepository, OrderRepository orderRepository, StoreRepository storeRepository) {
+	public ReviewServiceImpl(ReviewRepository reviewRepository, OrderRepository orderRepository, StoreService storeService) {
 		this.reviewRepository = reviewRepository;
 		this.orderRepository = orderRepository;
-		this.storeRepository = storeRepository;
+		this.storeService = storeService;
 	}
 
 	@Override
@@ -52,8 +51,7 @@ public class ReviewServiceImpl implements ReviewService {
 			throw new BusinessException(ErrorCode.REVIEW_ALREADY_EXISTS);
 		}
 
-		Store store = storeRepository.findById(request.storeId())
-			.orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
+		storeService.validateExistenceById(request.storeId());
 
 		Review review = new Review(
 			userId,
@@ -64,14 +62,16 @@ public class ReviewServiceImpl implements ReviewService {
 		);
 
 		Review savedReview = reviewRepository.save(review);
+
+		storeService.updateRating(request.storeId());
+
 		return ReviewResponseDto.from(savedReview);
 	}
 
 	@Override
 	@Transactional(readOnly = true)
 	public PagedResponse<ReviewResponseDto> getStoreReviews(UUID storeId, Pageable pageable) {
-		storeRepository.findById(storeId)
-			.orElseThrow(() -> new BusinessException(ErrorCode.STORE_NOT_FOUND));
+		storeService.validateExistenceById(storeId);
 
 		Page<Review> reviewPage = reviewRepository.findByStoreId(storeId, pageable);
 
@@ -105,7 +105,12 @@ public class ReviewServiceImpl implements ReviewService {
 			throw new BusinessException(ErrorCode.REVIEW_ACCESS_DENIED);
 		}
 
+		UUID storeId = review.getStoreId();
+
 		review.softDelete(username);
+
+		storeService.updateRating(storeId);
+
 		reviewRepository.save(review);
 	}
 }
