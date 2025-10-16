@@ -15,6 +15,9 @@ import jakarta.validation.Valid;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.data.web.SortDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,6 +41,8 @@ public class CategoryController {
     @GetMapping("/{categoryId}/stores")
     public ResponseEntity<PagedResponse<StoreResponseDto>> getStoresByCategory(
         @PathVariable UUID categoryId,
+        @PageableDefault(size = 10)
+        @SortDefault(sort = "createdAt", direction = Direction.DESC)
         Pageable pageable,
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
