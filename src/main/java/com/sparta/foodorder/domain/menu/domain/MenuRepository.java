@@ -1,5 +1,8 @@
 package com.sparta.foodorder.domain.menu.domain;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,8 +21,13 @@ public interface MenuRepository {
 
     //메뉴 전체 조회(일반 유저용)
     List<Menu> findByStoreIdAndActiveTrueAndHiddenFalseAndDeletedAtIsNull(UUID storeId);
+
     //메뉴 전체 조회(가게 주인용)
     List<Menu> findByStoreIdAndDeletedAtIsNull(UUID storeId);
-    List<Menu> findAllByIds(List<UUID> menuIds);
 
+    List<Menu> findAllById(List<UUID> menuIds);
+
+    Page<Menu> findByNameContaining(String searchString, Pageable pageable);
+
+    Optional<Menu> findByIdAndDeletedAtIsNull(UUID menuId);
 }

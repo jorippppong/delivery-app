@@ -16,8 +16,9 @@ public record StoreResponseDto(
     Double longitude,
     Double latitude,
     String phoneNumber,
+    Boolean isActive,
     Long ratingCount,
-    Float ratingAvg,
+    Double ratingAvg,
     Long deliveryFee,
     Long minOrderAmount,
     LocalTime opensAt,
@@ -35,6 +36,7 @@ public record StoreResponseDto(
             .address(store.getAddress())
             .longitude(store.getLocation().getX())
             .latitude(store.getLocation().getY())
+            .isActive(store.getIsActive())
             .phoneNumber(store.getPhoneNumber())
             .ratingCount(store.getRatingCount())
             .ratingAvg(store.getRatingAvg())

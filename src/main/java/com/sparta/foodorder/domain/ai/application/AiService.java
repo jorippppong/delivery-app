@@ -34,14 +34,11 @@ public class AiService {
         this.aiLogRepository = aiLogRepository;
     }
 
-    public AiResponseDto generateContent(String productName, String content) {
-        return generateContent(productName, content, defaultProvider);
-    }
-
-    public AiResponseDto generateContent(String productName, String content, String providerName) {
+    public AiResponseDto generateContent(Long userId, String productName, String content, String providerName) {
         String prompt = promptBuilder.buildProductGeneratePrompt(productName, content);
 
         AiRequestDto request = AiRequestDto.builder()
+                .userId(userId)
                 .productName(productName)
                 .content(content)
                 .prompt(prompt)
@@ -60,9 +57,8 @@ public class AiService {
         log.info("AI 컨텐츠 생성 요청 - Provider: {}", providerName);
         AiResponseDto aiResponseDto = provider.generateContent(request);
 
-        // TODO. 유저 ID 받아서 적용 필요
         AiLog aiLog = AiLog.builder()
-                .userId(1L)  // TODO. 수정필요
+                .userId(request.getUserId())
                 .aiModel(aiResponseDto.getModel())
                 .productName(request.getProductName())
                 .requestContent(request.getContent())

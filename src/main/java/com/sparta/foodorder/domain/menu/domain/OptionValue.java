@@ -19,7 +19,6 @@ public class OptionValue extends BaseEntity {
     @Column(name = "id")
     private UUID id;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "option_id", nullable = false)
     private Option option;
@@ -35,7 +34,7 @@ public class OptionValue extends BaseEntity {
 
 
     private OptionValue(Option option, String value, String description,
-                       Integer addPrice) {
+                        Integer addPrice) {
         this.option = option;
         this.value = value;
         this.description = description;
@@ -47,4 +46,13 @@ public class OptionValue extends BaseEntity {
         return new OptionValue(option, value, description, addPrice);
     }
 
+    public void updateOptionValue(String value, String description, Integer addPrice) {
+        if(value != null) this.value = value;
+        if(description != null) this.description = description;
+        if(addPrice != null) this.addPrice = addPrice;
+    }
+
+    public void delete(String deletedBy) {
+        this.softDelete(deletedBy);
+    }
 }

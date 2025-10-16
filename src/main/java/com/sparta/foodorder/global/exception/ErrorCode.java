@@ -35,14 +35,21 @@ public enum ErrorCode {
 
     // 메뉴 관련 에러
     MENU_NOT_FOUND(HttpStatus.NOT_FOUND, "M001", "존재하지 않는 메뉴입니다."),
+    MENU_OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "M002", "존재하지 않는 옵션입니다."),
+    MENU_OPTION_VALUE_NOT_FOUND(HttpStatus.NOT_FOUND, "M003", "존재하지 않는 옵션 value 값입니다."),
+
+    // 온셥 관련 에러
+    OPTION_PERMISSION_DENIED(HttpStatus.FORBIDDEN, "MO001", "해당 옵션에 대한 접근권한이 없습니다."),
+    OPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "MO002", "존재하지 않는 옵션입니다."),
+    OPTION_VALUE_NOT_FOUND(HttpStatus.NOT_FOUND, "MO003", "존재하지 않는 옵션값입니다."),
 
     // 주문 관련 에러
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "O001", "주문을 찾을 수 없습니다"),
     INVALID_ORDER_STATUS(HttpStatus.BAD_REQUEST, "O002", "잘못된 주문 상태입니다"),
     ORDER_CANT_ACCESS(HttpStatus.FORBIDDEN, "O003", "주문에 접근할 수 없습니다.(주문의 작성자, 가게의 주인만 접근 가능)"),
     ORDER_CANCEL_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "O004", "created, pending 상태일 때만 주문 취소 가능합니다."),
-    ORDER_ACCEPT_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "O005", "pending 상태일 때만 주문 취소 가능합니다."),
-    ORDER_REJECT_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "O006", "pending 상태일 때만 주문 취소 가능합니다."),
+    ORDER_ACCEPT_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "O005", "pending 상태일 때만 주문 수락 가능합니다."),
+    ORDER_REJECT_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "O006", "pending 상태일 때만 주문 거절 가능합니다."),
     ORDER_READY_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "O007", "accept 상태일 때만 주문 취소 가능합니다."),
     ORDER_DELIVER_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "O008", "ready 상태일 때만 주문 취소 가능합니다."),
     ORDER_COMPLETE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "O009", "delivering 상태일 때만 주문 취소 가능합니다."),
@@ -56,7 +63,7 @@ public enum ErrorCode {
     ADDRESS_DELETED(HttpStatus.GONE, "A005", "삭제된 주소입니다"),
     ADDRESS_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "A006", "주소는 최대 10개까지 등록할 수 있습니다"),
     DEFAULT_ADDRESS_DELETE_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "A007", "기본 배송지는 삭제할 수 없습니다"),
-    
+
     // 인증 관련 에러
     TOO_MANY_LOGIN_ATTEMPTS(HttpStatus.TOO_MANY_REQUESTS, "AUTH001", "로그인 시도 횟수를 초과했습니다"),
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH002", "유효하지 않은 토큰입니다"),
@@ -73,6 +80,12 @@ public enum ErrorCode {
     PAYMENT_ALREADY_REFUNDED(HttpStatus.BAD_REQUEST, "PAY006", "이미 환불된 결제입니다"),
     PAYMENT_USER_MISMATCH(HttpStatus.FORBIDDEN, "PAY007", "본인의 결제만 처리할 수 있습니다"),
     PAYMENT_OWNER_MISMATCH(HttpStatus.FORBIDDEN, "PAY008", "본인 가게의 주문만 처리할 수 있습니다"),
+
+    // 리뷰 관련 에러
+    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "R001", "리뷰를 찾을 수 없습니다"),
+    REVIEW_ALREADY_EXISTS(HttpStatus.CONFLICT, "R002", "이미 해당 주문에 대한 리뷰가 존재합니다"),
+    ORDER_NOT_COMPLETED(HttpStatus.BAD_REQUEST, "R003", "배송 완료된 주문만 리뷰를 작성할 수 있습니다"),
+    REVIEW_ACCESS_DENIED(HttpStatus.FORBIDDEN, "R004", "리뷰에 대한 접근 권한이 없습니다"),
 
     // AI 관련 에러
     AI_PROVIDER_NOT_FOUND(HttpStatus.BAD_REQUEST, "AI001", "지원하지 않는 AI Provider입니다"),

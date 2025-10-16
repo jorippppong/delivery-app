@@ -67,16 +67,22 @@ public class StoreController {
     @GetMapping
     public ResponseEntity<PagedResponse<StoreResponseDto>> getStores(
         @RequestParam(name = "q", required = false) String query,
-        Pageable pageable
+        Pageable pageable,
+        @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
-        PagedResponse<StoreResponseDto> stores = storeService.getStores(query, pageable);
+        UserRole role = userDetails.getRole();
+        PagedResponse<StoreResponseDto> stores = storeService.getStores(query, pageable, role);
         return ResponseEntity.ok(stores);
     }
 
     @Operation(summary = "가게 상세조회", description = "특정 가게를 상세조회합니다.")
     @GetMapping("/{storeId}")
-    public ResponseEntity<StoreDetailResponseDto> getStore(@PathVariable UUID storeId) {
-        StoreDetailResponseDto store = storeService.getStore(storeId);
+    public ResponseEntity<StoreDetailResponseDto> getStore(
+        @PathVariable UUID storeId,
+        @AuthenticationPrincipal CustomUserDetails userDetails
+    ) {
+        UserRole role = userDetails.getRole();
+        StoreDetailResponseDto store = storeService.getStore(storeId, role);
         return ResponseEntity.ok(store);
     }
 }

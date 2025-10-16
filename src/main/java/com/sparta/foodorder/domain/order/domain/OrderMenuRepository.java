@@ -6,5 +6,7 @@ import java.util.List;
 
 @Repository
 public interface OrderMenuRepository {
-    void saveAll(List<OrderMenu> orderMenus);
+    void save(OrderMenu orderMenu);
+
+    List<OrderMenu> findAllByOrder(Order order);
 }
