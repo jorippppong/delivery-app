@@ -79,6 +79,12 @@ public enum ErrorCode {
     PAYMENT_USER_MISMATCH(HttpStatus.FORBIDDEN, "PAY007", "본인의 결제만 처리할 수 있습니다"),
     PAYMENT_OWNER_MISMATCH(HttpStatus.FORBIDDEN, "PAY008", "본인 가게의 주문만 처리할 수 있습니다"),
 
+    // 리뷰 관련 에러
+    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "R001", "리뷰를 찾을 수 없습니다"),
+    REVIEW_ALREADY_EXISTS(HttpStatus.CONFLICT, "R002", "이미 해당 주문에 대한 리뷰가 존재합니다"),
+    ORDER_NOT_COMPLETED(HttpStatus.BAD_REQUEST, "R003", "배송 완료된 주문만 리뷰를 작성할 수 있습니다"),
+    REVIEW_ACCESS_DENIED(HttpStatus.FORBIDDEN, "R004", "리뷰에 대한 접근 권한이 없습니다"),
+
     // AI 관련 에러
     AI_PROVIDER_NOT_FOUND(HttpStatus.BAD_REQUEST, "AI001", "지원하지 않는 AI Provider입니다"),
     AI_PROMPT_REQUIRED(HttpStatus.BAD_REQUEST, "AI002", "프롬프트는 필수입니다"),

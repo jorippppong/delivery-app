@@ -39,7 +39,7 @@ public class User extends BaseEntity {
     private UserRole role = UserRole.USER;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private UserStatus status = UserStatus.ACTIVE;
 
     @Column(name = "is_deleted", nullable = false)
