@@ -6,19 +6,26 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Table(name = "p_order_menu")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
 public class OrderMenu extends BaseCreateEntity {
-    @Getter
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "order_id", nullable = false)
-    private UUID orderId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false, foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
+    private Order order;
+
+    @OneToMany(mappedBy = "orderMenu", cascade = CascadeType.PERSIST)
+    private List<OrderMenuOption> options = new ArrayList<>();
 
     @Column(name = "menu_id")
     private UUID menuId;
@@ -32,8 +39,8 @@ public class OrderMenu extends BaseCreateEntity {
     @Column(name = "total_price", nullable = false)
     private int totalPrice;
 
-    public OrderMenu(UUID orderId, UUID menuId, int quantity, String menuName, int totalPrice) {
-        this.orderId = orderId;
+    public OrderMenu(Order order, UUID menuId, int quantity, String menuName, int totalPrice) {
+        this.order = order;
         this.menuId = menuId;
         this.quantity = quantity;
         this.menuName = menuName;
@@ -42,5 +49,10 @@ public class OrderMenu extends BaseCreateEntity {
 
     public void updateTotalPrice(int totalPrice) {
         this.totalPrice = totalPrice;
+    }
+
+    public void addOption(OrderMenuOption option) {
+        options.add(option);
+        option.updateOrderMenu(this);
     }
 }

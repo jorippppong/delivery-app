@@ -1,6 +1,8 @@
 package com.sparta.foodorder.domain.order.presentation.dto;
 
-import com.sparta.foodorder.domain.order.application.OrderDetailQuery;
+import com.sparta.foodorder.domain.order.domain.Order;
+import com.sparta.foodorder.domain.order.domain.OrderMenu;
+import com.sparta.foodorder.domain.order.domain.OrderMenuOptionValue;
 import com.sparta.foodorder.domain.user.domain.User;
 
 import java.time.LocalDateTime;
@@ -18,8 +20,8 @@ public record GetStoreOrdersResponseDto(
         LocalDateTime createdAt
 ) {
 
-    public static GetStoreOrdersResponseDto from(OrderDetailQuery orderDetail, User user) {
-        List<MenuInfo> menus = orderDetail.getMenus().stream()
+    public static GetStoreOrdersResponseDto from(Order order, List<OrderMenu> orderMenus, User user) {
+        List<MenuInfo> menus = orderMenus.stream()
                 .map(menu -> new MenuInfo(
                         menu.getMenuId(),
                         menu.getMenuName(),
@@ -28,7 +30,7 @@ public record GetStoreOrdersResponseDto(
                                 .map(option -> new OptionInfo(
                                         option.getOptionName(),
                                         option.getValues().stream()
-                                                .map(OrderDetailQuery.OrderMenuOptionValueQuery::getOptionValueName)
+                                                .map(OrderMenuOptionValue::getOptionValueName)
                                                 .toList()
                                 ))
                                 .toList()
@@ -36,14 +38,14 @@ public record GetStoreOrdersResponseDto(
                 .toList();
 
         return new GetStoreOrdersResponseDto(
-                orderDetail.getOrderId(),
+                order.getId(),
                 user.getNickName(),
-                orderDetail.getAddressLine(),
-                orderDetail.getDetailAddress(),
+                order.getAddressLine(),
+                order.getDetailAddress(),
                 menus,
-                orderDetail.getOrderStatus(),
-                orderDetail.getTotalPrice(),
-                orderDetail.getCreatedAt()
+                order.getOrderStatus().name(),
+                order.getTotalPrice(),
+                order.getCreatedAt()
         );
     }
 

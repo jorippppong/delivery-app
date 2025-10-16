@@ -24,6 +24,10 @@ import com.sparta.foodorder.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -50,58 +54,47 @@ public class OrderService {
 
     public UUID createOrder(CreateOrderRequestDto dto, Long userId) {
         storeService.validateExistenceById(dto.storeId());
-        List<Menu> menus = menuService.findAllByIds(dto.getMenuIds());
-        Map<UUID, Menu> menuMap = menus.stream()
-                .collect(Collectors.toMap(Menu::getId, m -> m));
+        List<Menu> menus = menuService.findAllById(dto.getMenuIds());
+        Map<UUID, Menu> menuMap = menus.stream().collect(Collectors.toMap(Menu::getId, m -> m));
 
-        // order 생성
+        // Order 저장
         Order order = new Order(userId, dto.storeId(), dto.addressLine(), dto.detailAddress(), 0, dto.memo());
         UUID orderId = orderRepository.save(order);
 
-        // orderMenu 생성
-        List<OrderMenu> orderMenus = new ArrayList<>();
-        List<OrderMenuOption> orderMenuOptions = new ArrayList<>();
-        List<OrderMenuOptionValue> orderMenuOptionValues = new ArrayList<>();
         int totalPrice = 0;
 
+        // OrderMenu 생성
         for (CreateOrderRequestDto.MenuInfo menuInfo : dto.menus()) {
             Menu menu = menuMap.get(menuInfo.menuId());
+            OrderMenu orderMenu = new OrderMenu(order, menu.getId(), menuInfo.quantity(), menu.getName(), 0);
 
             int menuTotalPrice = menu.getPrice() * menuInfo.quantity();
-            OrderMenu orderMenu = new OrderMenu(orderId, menu.getId(), menuInfo.quantity(), menu.getName(), 0);
-            orderMenus.add(orderMenu);
 
             // 옵션 처리
             for (CreateOrderRequestDto.OptionInfo optionInfo : menuInfo.options()) {
                 Option option = optionService.findById(optionInfo.optionId());
-                OrderMenuOption orderMenuOption = new OrderMenuOption(orderMenu.getId(), option.getName(), 0);
+                OrderMenuOption orderMenuOption = new OrderMenuOption(orderMenu, option.getName(), 0);
 
                 int optionTotalPrice = 0;
                 for (UUID valueId : optionInfo.optionValueIds()) {
                     OptionValue value = optionValueService.findById(valueId);
-                    OrderMenuOptionValue orderMenuOptionValue = new OrderMenuOptionValue(
-                            orderMenuOption.getId(),
-                            value.getValue(),
-                            value.getAddPrice()
-                    );
-                    orderMenuOptionValues.add(orderMenuOptionValue);
+                    OrderMenuOptionValue orderMenuOptionValue = new OrderMenuOptionValue(orderMenuOption, value.getValue(), value.getAddPrice());
+                    orderMenuOption.addValue(orderMenuOptionValue);
                     optionTotalPrice += value.getAddPrice();
                 }
 
                 orderMenuOption.setPrice(optionTotalPrice);
-                orderMenuOptions.add(orderMenuOption);
+                orderMenu.addOption(orderMenuOption);
                 menuTotalPrice += optionTotalPrice;
             }
 
             orderMenu.updateTotalPrice(menuTotalPrice);
+            orderMenuRepository.save(orderMenu);
             totalPrice += menuTotalPrice;
         }
 
-        orderMenuRepository.saveAllOrderMenu(orderMenus);
-        orderMenuRepository.saveAllOrderMenuOption(orderMenuOptions);
-        orderMenuRepository.saveAllOrderMenuOptionValue(orderMenuOptionValues);
-
         order.updateTotalPrice(totalPrice);
+        orderRepository.save(order);
 
         return orderId;
     }
@@ -160,51 +153,53 @@ public class OrderService {
     }
 
     public PagedResponse<GetUserOrdersResponseDto> getUserOrders(Long userId, int page, int size) {
-        List<OrderDetailQuery> orders = orderRepository.getUserOrders(userId, page - 1, size);
-        Set<UUID> storeIds = orders.stream()
-                .map(OrderDetailQuery::getStoreId)
+        Pageable pageable = (Pageable) PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Order> orderPage = orderRepository.findAllByUserId(userId, pageable);
+
+        Set<UUID> storeIds = orderPage.getContent().stream()
+                .map(Order::getStoreId)
                 .collect(Collectors.toSet());
         List<Store> stores = storeService.findAllByIds(storeIds);
         Map<UUID, Store> storeMap = stores.stream()
                 .collect(Collectors.toMap(Store::getId, s -> s));
 
-        List<GetUserOrdersResponseDto> dtos = orders.stream()
+        List<GetUserOrdersResponseDto> dtos = orderPage.getContent().stream()
                 .map(order -> {
                     Store store = storeMap.get(order.getStoreId());
-                    return GetUserOrdersResponseDto.from(order, store);
+                    List<OrderMenu> orderMenus = orderMenuRepository.findAllByOrder(order);
+                    return GetUserOrdersResponseDto.from(order, orderMenus, store);
                 })
                 .toList();
-        boolean hasNext = dtos.size() > size;
-        List<GetUserOrdersResponseDto> pageContent = hasNext ? dtos.subList(0, size) : dtos;
-        return PagedResponse.success(pageContent, page, pageContent.size(), hasNext);
+        return PagedResponse.success(dtos, orderPage.getNumber() + 1, orderPage.getSize(), orderPage.hasNext());
     }
 
     public PagedResponse<GetStoreOrdersResponseDto> getStoreOrders(UUID storeId, Long userId, int page, int size) {
         Store store = storeService.findByUUID(storeId);
         store.validateOwner(userId);
-        List<OrderDetailQuery> orders = orderRepository.getStoreOrders(storeId, page - 1, size);
-        Set<Long> userIds = orders.stream()
-                .map(OrderDetailQuery::getUserId)
+        Pageable pageable = (Pageable) PageRequest.of(page - 1, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Order> orderPage = orderRepository.findAllByStoreId(storeId, pageable);
+
+        Set<Long> userIds = orderPage.getContent().stream()
+                .map(Order::getUserId)
                 .collect(Collectors.toSet());
         List<User> users = userService.findAllByIdIn(userIds);
         Map<Long, User> userMap = users.stream()
                 .collect(Collectors.toMap(User::getId, u -> u));
 
-        List<GetStoreOrdersResponseDto> dtos = orders.stream()
+        List<GetStoreOrdersResponseDto> dtos = orderPage.getContent().stream()
                 .map(order -> {
                     User user = userMap.get(order.getUserId());
-                    return GetStoreOrdersResponseDto.from(order, user);
+                    List<OrderMenu> orderMenus = orderMenuRepository.findAllByOrder(order);
+                    return GetStoreOrdersResponseDto.from(order, orderMenus, user);
                 })
                 .toList();
-        boolean hasNext = dtos.size() > size;
-        List<GetStoreOrdersResponseDto> pageContent = hasNext ? dtos.subList(0, size) : dtos;
-        return PagedResponse.success(pageContent, page, pageContent.size(), hasNext);
+        return PagedResponse.success(dtos, orderPage.getNumber() + 1, orderPage.getSize(), orderPage.hasNext());
     }
 
     public GetOrderResponseDto getOrder(UUID orderId, Long userId, String nickname) {
         Order order = getOrder(orderId);
         order.validateOrderWriter(userId);
-        OrderDetailQuery orderDetail = orderRepository.getOrderDetail(orderId);
-        return GetOrderResponseDto.from(order, orderDetail, nickname);
+        List<OrderMenu> orderMenus = orderMenuRepository.findAllByOrder(order);
+        return GetOrderResponseDto.from(order, orderMenus, nickname);
     }
 }

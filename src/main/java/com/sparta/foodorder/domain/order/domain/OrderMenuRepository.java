@@ -6,9 +6,7 @@ import java.util.List;
 
 @Repository
 public interface OrderMenuRepository {
-    void saveAllOrderMenu(List<OrderMenu> orderMenus);
+    void save(OrderMenu orderMenu);
 
-    void saveAllOrderMenuOption(List<OrderMenuOption> orderMenuOptions);
-
-    void saveAllOrderMenuOptionValue(List<OrderMenuOptionValue> orderMenuOptionValues);
+    List<OrderMenu> findAllByOrder(Order order);
 }

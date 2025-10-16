@@ -1,7 +1,8 @@
 package com.sparta.foodorder.domain.order.presentation.dto;
 
-import com.sparta.foodorder.domain.order.application.OrderDetailQuery;
 import com.sparta.foodorder.domain.order.domain.Order;
+import com.sparta.foodorder.domain.order.domain.OrderMenu;
+import com.sparta.foodorder.domain.order.domain.OrderMenuOptionValue;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,8 +17,8 @@ public record GetOrderResponseDto(
         int totalAmount,
         LocalDateTime createdAt
 ) {
-    public static GetOrderResponseDto from(Order order, OrderDetailQuery orderMenus, String nickName) {
-        List<MenuInfo> menus = orderMenus.getMenus().stream()
+    public static GetOrderResponseDto from(Order order, List<OrderMenu> orderMenus, String nickName) {
+        List<MenuInfo> menus = orderMenus.stream()
                 .map(menu -> new MenuInfo(
                         menu.getMenuId(),
                         menu.getMenuName(),
@@ -26,7 +27,7 @@ public record GetOrderResponseDto(
                                 .map(option -> new OptionInfo(
                                         option.getOptionName(),
                                         option.getValues().stream()
-                                                .map(OrderDetailQuery.OrderMenuOptionValueQuery::getOptionValueName)
+                                                .map(OrderMenuOptionValue::getOptionValueName)
                                                 .toList()
                                 ))
                                 .toList()
@@ -38,9 +39,9 @@ public record GetOrderResponseDto(
                 order.getAddressLine(),
                 order.getDetailAddress(),
                 menus,
-                orderMenus.getOrderStatus(),
-                orderMenus.getTotalPrice(),
-                orderMenus.getCreatedAt()
+                order.getOrderStatus().name(),
+                order.getTotalPrice(),
+                order.getCreatedAt()
         );
     }
 
