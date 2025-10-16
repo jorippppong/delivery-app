@@ -13,11 +13,20 @@ public class OptionValueResponseDto {
     private final String description;
     private final Integer addPrice;
 
-    private OptionValueResponseDto(OptionValue optionValue) {
-        this.id = optionValue.getId();
-        this.value = optionValue.getValue();
-        this.description = optionValue.getDescription();
-        this.addPrice = optionValue.getAddPrice();
+    private OptionValueResponseDto(UUID id, String value, String description, Integer addPrice) {
+        this.id =  id;
+        this.value = value;
+        this.description = description;
+        this.addPrice = addPrice;
+    }
+
+    public static OptionValueResponseDto from(OptionValue optionValue) {
+        return new OptionValueResponseDto (
+                optionValue.getId(),
+                optionValue.getValue(),
+                optionValue.getDescription(),
+                optionValue.getAddPrice()
+        );
     }
 
     public static OptionValueResponseDto from(OptionValue optionValue) {
@@ -25,7 +34,8 @@ public class OptionValueResponseDto {
     }
 
     public static List<OptionValueResponseDto> findAllOptionValues(List<OptionValue>  optionValues) {
-        return optionValues.stream().map(OptionValueResponseDto::new)
-                .toList();
+        return optionValues.stream()
+                .filter(optionValue -> optionValue.getDeletedAt() == null)
+                .map(OptionValueResponseDto::from).toList();
     }
 }

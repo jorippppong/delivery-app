@@ -13,11 +13,15 @@ import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Setter
 public class MenuCreateRequestDto {
+
+    private UUID storeId;
+
 
     @NotBlank
     private String name;
