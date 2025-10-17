@@ -34,7 +34,6 @@ public class OptionResponseDto {
     public static List<OptionResponseDto> findAllOptions(List<Option> options) {
         return options.stream()
                 .filter(Objects::nonNull)
-                .filter(option -> option.getDeletedAt() == null)
                 .map(OptionResponseDto::from)
                 .toList();
     }
