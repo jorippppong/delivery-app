@@ -68,7 +68,7 @@
 
 #### 배포 서버 사용하기
 
-[🔗 배포서버 링크](https://www.erdcloud.com/d/JHFDM8y4GuoN9zpaE)
+[🔗 배포서버 링크](http://15.165.159.66/swagger-ui/index.html)
 
 #### docker-compose 로 실행하는 방법
 
