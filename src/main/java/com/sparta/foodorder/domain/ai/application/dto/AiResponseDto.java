@@ -13,5 +13,4 @@ public class AiResponseDto {
     private String generatedText;
     private String provider;
     private String model;
-    private Integer tokensUsed;
 }
