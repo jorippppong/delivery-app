@@ -38,8 +38,8 @@ out/
 
 ### yml ###
 *.yml
-!docker-compose.yml
+
 
 .md.env
 *.env
-!docker/*.yml
+
