@@ -38,4 +38,7 @@ out/
 
 ### yml ###
 *.yml
-!docker/*.yml
+
+.md.env
+*.env
+

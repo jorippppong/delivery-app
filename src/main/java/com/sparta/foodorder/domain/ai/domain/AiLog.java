@@ -40,6 +40,7 @@ public class AiLog extends BaseCreateEntity {
 
     @Column(name = "status", length = 20, nullable = false)
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private Status status = Status.SUCCESS;
 
     public enum RequestType {

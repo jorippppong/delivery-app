@@ -11,9 +11,9 @@ import java.util.Optional;
 public interface AuthService {
     
     /**
-     * 로그인 처리
+     * 로그인 처리 (쿠키 설정 포함)
      */
-    LoginResponseDto login(LoginRequestDto requestDto);
+    LoginResponseDto login(LoginRequestDto requestDto, HttpServletResponse response);
     
     /**
      * 이메일로 사용자 조회 (권한 정보 포함)
@@ -26,7 +26,7 @@ public interface AuthService {
     String logout(HttpServletRequest request, HttpServletResponse response);
     
     /**
-     * 토큰 갱신 처리
+     * 토큰 갱신 처리 (쿠키 설정 포함)
      */
-    LoginResponseDto refresh(String refreshToken);
+    LoginResponseDto refresh(String refreshToken, HttpServletResponse response);
 }
