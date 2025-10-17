@@ -53,6 +53,10 @@ public class CategoryServiceImpl implements CategoryService {
         validateCategoryPermission(role);
         Category category = categoryRepository.findById(categoryId)
             .orElseThrow(() -> new BusinessException(ErrorCode.CATEGORY_NOT_FOUND));
+        if(categoryRepository.existsByName(requestDto.name())) {
+            throw new BusinessException(ErrorCode.CATEGORY_ALREADY_EXIST);
+        }
+
         category.updateCategory(requestDto.name());
 
         return CategoryResponseDto.from(category);

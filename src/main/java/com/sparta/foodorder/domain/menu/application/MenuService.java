@@ -185,7 +185,6 @@ public class MenuService {
                 throw new BusinessException(ErrorCode.STORE_NOT_FOUND);
             }
             menu = menuRepository.findByStoreIdAndActiveTrueAndHiddenFalseAndDeletedAtIsNull(storeId);
-
         } else {
             log.info("Owner 조회 ");
             if (store.isDeleted()) {

@@ -7,7 +7,6 @@ import com.sparta.foodorder.domain.menu.presentation.dto.*;
 import com.sparta.foodorder.domain.user.domain.UserRole;
 import com.sparta.foodorder.global.dto.PagedResponse;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.UUID;
@@ -23,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-public class MenuController {
+public class MenuController implements MenuApiDocs {
 
     private final MenuService menuService;
 
@@ -44,8 +43,8 @@ public class MenuController {
     @PostMapping("/{menuId}/options")
     @PreAuthorize("hasAnyRole('OWNER','MANAGER','MASTER')")
     public ResponseEntity<MenuResponseDto> createOption(@PathVariable UUID menuId,
-                                                        @RequestBody @Valid OptionCreateRequestDto requestDto,
-                                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        @RequestBody @Valid OptionCreateRequestDto requestDto,
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         MenuResponseDto menuResponseDto = menuService.createOption(requestDto, menuId, userDetails);
         return ResponseEntity.ok(menuResponseDto);
@@ -97,8 +96,8 @@ public class MenuController {
 
     @GetMapping("/{menuId}/options")
     public ResponseEntity<List<OptionResponseDto>> getOptions(@PathVariable UUID menuId,
-                                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
-        log.info(" 컨트롤러 유입 {}",menuId);
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        log.info(" 컨트롤러 유입 {}", menuId);
         List<OptionResponseDto> optionResponseDtoList = menuService.getOptions(menuId, userDetails);
 
         return ResponseEntity.ok(optionResponseDtoList);
@@ -107,9 +106,10 @@ public class MenuController {
     //TODO: 단일 option에 대한 value들 조회
     @GetMapping("/{menuId}/options/{optionId}")
     public ResponseEntity<List<OptionValueResponseDto>> getOptionValues(@PathVariable UUID menuId,
-                                                                        @PathVariable UUID optionId,
-                                                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
-        List<OptionValueResponseDto> optionValueResponseDtoList = menuService.getOptionValues(menuId, optionId, userDetails);
+        @PathVariable UUID optionId,
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<OptionValueResponseDto> optionValueResponseDtoList = menuService.getOptionValues(
+            menuId, optionId, userDetails);
         return ResponseEntity.ok(optionValueResponseDtoList);
     }
 
@@ -149,7 +149,6 @@ public class MenuController {
         return ResponseEntity.ok(response);
     }
 
-    @Operation(summary = "옵션 수정", description = "가게 주인이 특정 메뉴에 대한 옵션을 수정합니다.")
     @PatchMapping("/{menuId}/options/{optionId}")
     public ResponseEntity<OptionResponseDto> updateOption(
         @PathVariable UUID menuId,
@@ -158,12 +157,12 @@ public class MenuController {
         @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Long userId = userDetails.getUserId();
-        OptionResponseDto responseDto = menuService.updateOption(requestDto, menuId, optionId, userId);
+        OptionResponseDto responseDto = menuService.updateOption(requestDto, menuId, optionId,
+            userId);
 
         return ResponseEntity.ok(responseDto);
     }
 
-    @Operation(summary = "옵션 삭제", description = "가게 주인이 특정 메뉴에 대한 옵션을 삭제합니다.")
     @DeleteMapping("/{menuId}/options/{optionId}")
     public ResponseEntity<Void> deleteOption(
         @PathVariable UUID menuId,
@@ -177,7 +176,6 @@ public class MenuController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "옵션값 수정", description = "가게 주인이 특정 옵션에 대한 옵션값을 수정합니다.")
     @PatchMapping("/{menuId}/options/{optionId}/values/{valueId}")
     public ResponseEntity<OptionValueResponseDto> updateOptionValue(
         @PathVariable UUID menuId,
@@ -193,7 +191,6 @@ public class MenuController {
         return ResponseEntity.ok(responseDto);
     }
 
-    @Operation(summary = "옵션값 삭제", description = "가게 주인이 특정 옵션에 대한 옵션값을 삭제합니다.")
     @DeleteMapping("/{menuId}/options/{optionId}/values/{valueId}")
     public ResponseEntity<Void> deleteOptionValue(
         @PathVariable UUID menuId,

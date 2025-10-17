@@ -1,0 +1,25 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: sparta9-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: foodorder
+      MYSQL_USER: foodorder
+      MYSQL_PASSWORD: foodorder123
+    ports:
+      - "3308:3306"
+    networks:
+      - sparta9-network
+
+  redis:
+    image: redis:7
+    container_name: sparta9-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - sparta9-network
+
+networks:
+  sparta9-network:
+    driver: bridge

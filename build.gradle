@@ -48,6 +48,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     // JSON processing
     implementation 'com.fasterxml.jackson.core:jackson-databind'
+    
+    // .env 파일 자동 로드
+    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+    
     // querydsl
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
     annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
@@ -60,11 +64,14 @@ tasks.named('test') {
 }
 
 
-// application.yml 설정 파일 복사
+// config/ 폴더의 모든 yml 파일을 src/main/resources/로 복사
 tasks.register('copyConfig', Copy) {
     from 'config'
-    include "application.yml"
+    include "application*.yml"  // application.yml, application-dev.yml, application-prod.yml 모두 포함
     into 'src/main/resources'
 }
 
 processResources.dependsOn('copyConfig')
+
+// 빌드 전에 항상 최신 설정 복사
+compileJava.dependsOn('copyConfig')
